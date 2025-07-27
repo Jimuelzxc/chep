@@ -557,6 +557,8 @@ function createAICompanionUI() {
                 return !!settingsManager.get('openaiApiKey');
             case 'gemini':
                 return !!settingsManager.get('geminiApiKey');
+            case 'openrouter':
+                return !!settingsManager.get('openrouterApiKey');
             default:
                 return false;
         }

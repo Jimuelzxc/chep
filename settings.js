@@ -17,11 +17,13 @@ class SettingsManager {
             enableKeyboardShortcuts: true,
             soundNotifications: false,
             // AI Provider Settings
-            aiProvider: 'openai', // openai, gemini, claude, ollama
+            aiProvider: 'openai', // openai, gemini, openrouter
             openaiApiKey: '',
             openaiModel: 'gpt-4o-mini',
             geminiApiKey: '',
-            geminiModel: 'gemini-2.5-flash',
+            geminiModel: 'gemini-1.5-flash',
+            openrouterApiKey: '',
+            openrouterModel: 'google/gemini-flash-1.5',
         };
         this.settings = { ...this.defaultSettings };
         this.loadSettings();
@@ -198,6 +200,7 @@ class SettingsManager {
                                 <select id="ai-provider-select">
                                     <option value="openai">OpenAI</option>
                                     <option value="gemini">Google Gemini</option>
+                                    <option value="openrouter">OpenRouter</option>
                                 </select>
                             </div>
                             
@@ -231,6 +234,18 @@ class SettingsManager {
                                         <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
                                         <option value="gemini-pro">Gemini Pro</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <!-- OpenRouter Settings -->
+                            <div id="openrouter-settings" class="provider-settings">
+                                <div class="setting-item">
+                                    <label for="openrouter-api-key">OpenRouter API Key:</label>
+                                    <input type="password" id="openrouter-api-key" value="${this.settings.openrouterApiKey}" placeholder="sk-or-...">
+                                </div>
+                                <div class="setting-item">
+                                    <label for="openrouter-model">Model:</label>
+                                    <input type="text" id="openrouter-model" value="${this.settings.openrouterModel}" placeholder="google/gemini-flash-1.5">
                                 </div>
                             </div>
 
@@ -517,6 +532,8 @@ class SettingsManager {
         document.getElementById('openai-model').value = this.settings.openaiModel;
         document.getElementById('gemini-api-key').value = this.settings.geminiApiKey;
         document.getElementById('gemini-model').value = this.settings.geminiModel;
+        document.getElementById('openrouter-api-key').value = this.settings.openrouterApiKey;
+        document.getElementById('openrouter-model').value = this.settings.openrouterModel;
         
         // Show/hide provider settings based on selection
         this.updateProviderVisibility(this.settings.aiProvider);
@@ -584,7 +601,7 @@ class SettingsManager {
     }
 
     updateProviderVisibility(provider) {
-        const providers = ['openai', 'gemini'];
+        const providers = ['openai', 'gemini', 'openrouter'];
         providers.forEach(p => {
             const element = document.getElementById(`${p}-settings`);
             if (element) {
@@ -618,6 +635,8 @@ class SettingsManager {
         this.settings.openaiModel = modal.querySelector('#openai-model').value;
         this.settings.geminiApiKey = modal.querySelector('#gemini-api-key').value;
         this.settings.geminiModel = modal.querySelector('#gemini-model').value;
+        this.settings.openrouterApiKey = modal.querySelector('#openrouter-api-key').value;
+        this.settings.openrouterModel = modal.querySelector('#openrouter-model').value;
 
         this.saveSettings();
     }

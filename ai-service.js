@@ -12,6 +12,8 @@ class AIService {
                 return this.sendOpenAIMessage(transcript, message, history);
             case 'gemini':
                 return this.sendGeminiMessage(transcript, message, history);
+            case 'openrouter':
+                return this.sendOpenRouterMessage(transcript, message, history);
             default:
                 throw new Error(`Unsupported AI provider: ${provider}`);
         }
@@ -157,6 +159,51 @@ ${transcript}
         }
 
         return this.handleGeminiStreamResponse(response);
+    }
+
+    async sendOpenRouterMessage(transcript, message, history) {
+        const apiKey = this.settingsManager.get('openrouterApiKey');
+        const model = this.settingsManager.get('openrouterModel');
+
+        if (!apiKey) {
+            throw new Error('OpenRouter API key not configured. Please add your API key in settings.');
+        }
+
+        const messages = [
+            { role: 'system', content: this.buildSystemPrompt(transcript) }
+        ];
+
+        // Add conversation history
+        history.forEach(msg => {
+            if (msg.role === 'user' || msg.role === 'assistant') {
+                messages.push(msg);
+            }
+        });
+
+        // Add current message
+        messages.push({ role: 'user', content: message });
+
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: model,
+                messages: messages,
+                stream: true,
+                max_tokens: 2000,
+                temperature: 0.7
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(`OpenRouter API error: ${error.error?.message || response.statusText}`);
+        }
+
+        return this.handleStreamResponse(response);
     }
 
     async* handleStreamResponse(response) {

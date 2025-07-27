@@ -35,6 +35,7 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ✅ **Expandable/Full Screen Chat Interface:** Add functionality to expand the chat interface or make it full screen for better readability and user experience, as the current chat display area is too small. (Implemented with expand button in header that toggles between normal and full-screen modes)
 - ✅ **Add Loading Animation for Data Fetching:** Implement visual loading indicators when the AI is processing requests and fetching transcript data to improve user experience and provide feedback during wait times. (Implemented with spinning loader for transcript loading and typing dots for AI responses)
 - ✅ **Improve Initial Transcript Message:** Change the generic "Transcript loaded! Ask me anything about this video." message to something more engaging and informative. (Updated to "🎬 Ready to discuss this video! What would you like to know?" with emojis and better messaging throughout)
+- ✅ **Add OpenRouter as AI Provider:** Investigate and integrate OpenRouter to expand the available AI model options.
 
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*
