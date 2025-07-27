@@ -557,10 +557,6 @@ function createAICompanionUI() {
                 return !!settingsManager.get('openaiApiKey');
             case 'gemini':
                 return !!settingsManager.get('geminiApiKey');
-            case 'claude':
-                return !!settingsManager.get('claudeApiKey');
-            case 'ollama':
-                return !!settingsManager.get('ollamaEndpoint');
             default:
                 return false;
         }

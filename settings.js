@@ -22,10 +22,6 @@ class SettingsManager {
             openaiModel: 'gpt-4o-mini',
             geminiApiKey: '',
             geminiModel: 'gemini-2.5-flash',
-            claudeApiKey: '',
-            claudeModel: 'claude-3-haiku-20240307',
-            ollamaEndpoint: 'http://localhost:11434',
-            ollamaModel: 'llama3.2'
         };
         this.settings = { ...this.defaultSettings };
         this.loadSettings();
@@ -202,8 +198,6 @@ class SettingsManager {
                                 <select id="ai-provider-select">
                                     <option value="openai">OpenAI</option>
                                     <option value="gemini">Google Gemini</option>
-                                    <option value="claude">Anthropic Claude</option>
-                                    <option value="ollama">Ollama (Local)</option>
                                 </select>
                             </div>
                             
@@ -240,33 +234,6 @@ class SettingsManager {
                                 </div>
                             </div>
 
-                            <!-- Claude Settings -->
-                            <div id="claude-settings" class="provider-settings">
-                                <div class="setting-item">
-                                    <label for="claude-api-key">Claude API Key:</label>
-                                    <input type="password" id="claude-api-key" value="${this.settings.claudeApiKey}" placeholder="sk-ant-...">
-                                </div>
-                                <div class="setting-item">
-                                    <label for="claude-model">Model:</label>
-                                    <select id="claude-model">
-                                        <option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
-                                        <option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
-                                        <option value="claude-3-opus-20240229">Claude 3 Opus</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Ollama Settings -->
-                            <div id="ollama-settings" class="provider-settings">
-                                <div class="setting-item">
-                                    <label for="ollama-endpoint">Ollama Endpoint:</label>
-                                    <input type="text" id="ollama-endpoint" value="${this.settings.ollamaEndpoint}" placeholder="http://localhost:11434">
-                                </div>
-                                <div class="setting-item">
-                                    <label for="ollama-model">Model:</label>
-                                    <input type="text" id="ollama-model" value="${this.settings.ollamaModel}" placeholder="llama3.2">
-                                </div>
-                            </div>
                         </div>
                     </div>
                     <div class="settings-footer">
@@ -550,10 +517,6 @@ class SettingsManager {
         document.getElementById('openai-model').value = this.settings.openaiModel;
         document.getElementById('gemini-api-key').value = this.settings.geminiApiKey;
         document.getElementById('gemini-model').value = this.settings.geminiModel;
-        document.getElementById('claude-api-key').value = this.settings.claudeApiKey;
-        document.getElementById('claude-model').value = this.settings.claudeModel;
-        document.getElementById('ollama-endpoint').value = this.settings.ollamaEndpoint;
-        document.getElementById('ollama-model').value = this.settings.ollamaModel;
         
         // Show/hide provider settings based on selection
         this.updateProviderVisibility(this.settings.aiProvider);
@@ -621,7 +584,7 @@ class SettingsManager {
     }
 
     updateProviderVisibility(provider) {
-        const providers = ['openai', 'gemini', 'claude', 'ollama'];
+        const providers = ['openai', 'gemini'];
         providers.forEach(p => {
             const element = document.getElementById(`${p}-settings`);
             if (element) {
@@ -655,10 +618,6 @@ class SettingsManager {
         this.settings.openaiModel = modal.querySelector('#openai-model').value;
         this.settings.geminiApiKey = modal.querySelector('#gemini-api-key').value;
         this.settings.geminiModel = modal.querySelector('#gemini-model').value;
-        this.settings.claudeApiKey = modal.querySelector('#claude-api-key').value;
-        this.settings.claudeModel = modal.querySelector('#claude-model').value;
-        this.settings.ollamaEndpoint = modal.querySelector('#ollama-endpoint').value;
-        this.settings.ollamaModel = modal.querySelector('#ollama-model').value;
 
         this.saveSettings();
     }

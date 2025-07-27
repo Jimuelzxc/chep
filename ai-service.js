@@ -12,10 +12,6 @@ class AIService {
                 return this.sendOpenAIMessage(transcript, message, history);
             case 'gemini':
                 return this.sendGeminiMessage(transcript, message, history);
-            case 'claude':
-                return this.sendClaudeMessage(transcript, message, history);
-            case 'ollama':
-                return this.sendOllamaMessage(transcript, message, history);
             default:
                 throw new Error(`Unsupported AI provider: ${provider}`);
         }
@@ -163,96 +159,6 @@ ${transcript}
         return this.handleGeminiStreamResponse(response);
     }
 
-    async sendClaudeMessage(transcript, message, history) {
-        const apiKey = this.settingsManager.get('claudeApiKey');
-        const model = this.settingsManager.get('claudeModel');
-
-        if (!apiKey) {
-            throw new Error('Claude API key not configured. Please add your API key in settings.');
-        }
-
-        const messages = [];
-
-        // Add conversation history
-        history.forEach(msg => {
-            if (msg.role === 'user' || msg.role === 'assistant') {
-                messages.push(msg);
-            }
-        });
-
-        // Add current message
-        messages.push({ role: 'user', content: message });
-
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'x-api-key': apiKey,
-                'Content-Type': 'application/json',
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: model,
-                max_tokens: 2000,
-                system: this.buildSystemPrompt(transcript),
-                messages: messages,
-                stream: true
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(`Claude API error: ${error.error?.message || response.statusText}`);
-        }
-
-        return this.handleClaudeStreamResponse(response);
-    }
-
-    async sendOllamaMessage(transcript, message, history) {
-        const endpoint = this.settingsManager.get('ollamaEndpoint');
-        const model = this.settingsManager.get('ollamaModel');
-
-        if (!endpoint) {
-            throw new Error('Ollama endpoint not configured. Please set the endpoint in settings.');
-        }
-
-        // Build conversation context
-        let conversationText = this.buildSystemPrompt(transcript) + '\n\n';
-
-        // Add conversation history
-        history.forEach(msg => {
-            if (msg.role === 'user') {
-                conversationText += `User: ${msg.content}\n\n`;
-            } else if (msg.role === 'assistant') {
-                conversationText += `Assistant: ${msg.content}\n\n`;
-            }
-        });
-
-        // Add current message
-        conversationText += `User: ${message}`;
-
-        const response = await fetch(`${endpoint}/api/generate`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: model,
-                prompt: conversationText,
-                stream: true,
-                options: {
-                    temperature: 0.7,
-                    num_predict: 2000
-                }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ollama API error: ${response.statusText}`);
-        }
-
-        return this.handleOllamaStreamResponse(response);
-    }
-
     async* handleStreamResponse(response) {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -318,71 +224,6 @@ ${transcript}
                     const newText = combinedText.substring(lastYieldedText.length);
                     yield newText;
                     lastYieldedText = combinedText;
-                }
-            }
-        } finally {
-            reader.releaseLock();
-        }
-    }
-
-    async* handleClaudeStreamResponse(response) {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        try {
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const data = line.slice(6);
-
-                        try {
-                            const parsed = JSON.parse(data);
-                            if (parsed.type === 'content_block_delta') {
-                                const content = parsed.delta?.text;
-                                if (content) {
-                                    yield content;
-                                }
-                            }
-                        } catch (e) {
-                            // Skip invalid JSON
-                        }
-                    }
-                }
-            }
-        } finally {
-            reader.releaseLock();
-        }
-    }
-
-    async* handleOllamaStreamResponse(response) {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        try {
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
-
-                for (const line of lines) {
-                    if (line.trim()) {
-                        try {
-                            const parsed = JSON.parse(line);
-                            if (parsed.response) {
-                                yield parsed.response;
-                            }
-                        } catch (e) {
-                            // Skip invalid JSON
-                        }
-                    }
                 }
             }
         } finally {

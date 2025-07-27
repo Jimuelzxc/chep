@@ -39,4 +39,6 @@ This file tracks bugs, feature requests, and general notes for future reference 
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*
 
+- ✅ **Simplify API Providers:** Refactor the codebase to remove support for other API providers, concentrating exclusively on Gemini and OpenAI to streamline development and reduce complexity.
+
 

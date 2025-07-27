@@ -6,7 +6,7 @@ A powerful browser extension that transforms your YouTube viewing experience by 
 
 ## Key Features
 
-- **🤖 Multiple AI Providers**: Choose from OpenAI, Google Gemini, Anthropic Claude, or local Ollama models
+- **🤖 Multiple AI Providers**: Choose from OpenAI or Google Gemini
 - **⚙️ Easy Configuration**: Simple settings panel to configure your preferred AI provider
 - **⏰ Smart Timestamps**: Click on timestamps in AI responses to jump directly to relevant video moments
 - **💬 Contextual Conversations**: Maintains conversation history for natural, flowing discussions
@@ -53,16 +53,6 @@ A powerful browser extension that transforms your YouTube viewing experience by 
 - **Models**: Gemini 1.5 Flash, Gemini 1.5 Pro, Gemini Pro
 - **Get API Key**: https://aistudio.google.com/app/apikey
 - **Cost**: Generous free tier available
-
-### Anthropic Claude
-- **Models**: Claude 3 Haiku, Claude 3 Sonnet, Claude 3 Opus
-- **Get API Key**: https://console.anthropic.com/
-- **Cost**: Pay-per-use pricing
-
-### Ollama (Local)
-- **Models**: Llama 3.2, Mistral, CodeLlama, and many others
-- **Setup**: Install from https://ollama.ai/
-- **Cost**: Free (runs locally)
 
 ## Usage
 
