@@ -49,6 +49,7 @@ function createAICompanionUI() {
             gap: 8px;
         }
         .expand-btn,
+        .reset-btn,
         .settings-btn {
             background: none;
             border: none;
@@ -62,6 +63,7 @@ function createAICompanionUI() {
             transition: all 0.2s ease;
         }
         .expand-btn:hover,
+        .reset-btn:hover,
         .settings-btn:hover {
             background-color: var(--yt-spec-background-elevation-2);
             color: var(--yt-spec-text-primary);
@@ -273,6 +275,14 @@ function createAICompanionUI() {
                 </div>
             </div>
             <div class="ai-header-controls">
+                <button class="reset-btn" title="Clear Conversation">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </button>
                 <button class="settings-btn" title="Settings">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2.82l-.15.1a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1 0-2.82l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
@@ -301,6 +311,7 @@ function createAICompanionUI() {
     // --- Get Element References ---
     const header = container.querySelector('.ai-header');
     const headerLeft = container.querySelector('.ai-header-left');
+    const resetButton = container.querySelector('.reset-btn');
     const settingsButton = container.querySelector('.settings-btn');
     const chatDisplay = document.getElementById('chat-display-ext');
     const chatInput = document.getElementById('chat-input-ext');
@@ -332,6 +343,11 @@ function createAICompanionUI() {
     settingsButton.onclick = (e) => {
         e.stopPropagation(); // Prevent header click
         settingsManager.showSettings();
+    };
+
+    resetButton.onclick = (e) => {
+        e.stopPropagation(); // Prevent header click
+        resetChat();
     };
 
     chatSendButton.onclick = handleChat;
@@ -376,6 +392,12 @@ function createAICompanionUI() {
     });
 
     // --- Helper Functions ---
+    function resetChat() {
+        chatHistory = [];
+        chatDisplay.innerHTML = '';
+        appendChatMessage("Ready to discuss this video! What would you like to know?", 'ai');
+    }
+
     function parseMarkdown(text) {
         let html = text.replace(/&/g, '&').replace(/</g, '<').replace(/>/g, '>');
         html = html.replace(/^\s*[\*\-\+]\s+(.*)/gm, '<ul><li>$1</li></ul>').replace(/<\/ul>\n?<ul>/g, '');
