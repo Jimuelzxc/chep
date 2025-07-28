@@ -5,9 +5,7 @@ class SettingsManager {
             theme: 'dark',
             autoOpenTranscript: true,
             chatHeight: 280,
-            expandedChatHeight: 'calc(100vh - 140px)',
             fontSize: 14,
-            expandedFontSize: 16,
             enableTimestampLinks: true,
             typingSpeed: 50, // milliseconds delay between chunks
             maxChatHistory: 50,
@@ -80,13 +78,8 @@ class SettingsManager {
         // Apply chat height
         const chatDisplay = document.getElementById('chat-display-ext');
         if (chatDisplay) {
-            if (container.classList.contains('expanded')) {
-                chatDisplay.style.height = this.settings.expandedChatHeight;
-                chatDisplay.style.fontSize = this.settings.expandedFontSize + 'px';
-            } else {
-                chatDisplay.style.height = this.settings.chatHeight + 'px';
-                chatDisplay.style.fontSize = this.settings.fontSize + 'px';
-            }
+            chatDisplay.style.height = this.settings.chatHeight + 'px';
+            chatDisplay.style.fontSize = this.settings.fontSize + 'px';
         }
 
         // Apply compact mode

@@ -28,16 +28,6 @@ function createAICompanionUI() {
             overflow: hidden;
             transition: all 0.3s ease;
         }
-        #ai-companion-container-ext.expanded {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 9999;
-            border-radius: 0;
-            margin: 0;
-        }
         .ai-header {
             display: flex;
             justify-content: space-between;
@@ -114,13 +104,6 @@ function createAICompanionUI() {
             display: flex;
             flex-direction: column;
             gap: 10px;
-        }
-        #ai-companion-container-ext.expanded #chat-display-ext {
-            height: calc(100vh - 140px);
-            font-size: 16px;
-        }
-        #ai-companion-container-ext.expanded .ai-panel {
-            padding: 24px;
         }
         .chat-message {
             display: flex;
@@ -291,10 +274,10 @@ function createAICompanionUI() {
             </div>
             <div class="ai-header-controls">
                 <button class="settings-btn" title="Settings">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m15.5-3.5L19 4m-7 7-2.5 2.5M4 19l2.5-2.5m7-7L16 7"></path></svg>
-                </button>
-                <button class="expand-btn" title="Expand chat">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2.82l-.15.1a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1 0-2.82l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
                 </button>
                 <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </div>
@@ -319,7 +302,6 @@ function createAICompanionUI() {
     const header = container.querySelector('.ai-header');
     const headerLeft = container.querySelector('.ai-header-left');
     const settingsButton = container.querySelector('.settings-btn');
-    const expandButton = container.querySelector('.expand-btn');
     const chatDisplay = document.getElementById('chat-display-ext');
     const chatInput = document.getElementById('chat-input-ext');
     const chatSendButton = document.getElementById('chat-send-btn-ext');
@@ -350,11 +332,6 @@ function createAICompanionUI() {
     settingsButton.onclick = (e) => {
         e.stopPropagation(); // Prevent header click
         settingsManager.showSettings();
-    };
-
-    expandButton.onclick = (e) => {
-        e.stopPropagation(); // Prevent header click
-        toggleExpandedMode();
     };
 
     chatSendButton.onclick = handleChat;
@@ -389,12 +366,6 @@ function createAICompanionUI() {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
             e.preventDefault();
             settingsManager.showSettings();
-        }
-        
-        // Ctrl/Cmd + Shift + F: Toggle fullscreen
-        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
-            e.preventDefault();
-            toggleExpandedMode();
         }
         
         // Focus chat input when AI panel is open
@@ -650,38 +621,6 @@ function createAICompanionUI() {
             // Transcript already available
             appendChatMessage("Ready to discuss this video! What would you like to know?", 'ai');
         }
-    }
-
-    function toggleExpandedMode() {
-        const isExpanded = container.classList.contains('expanded');
-
-        if (isExpanded) {
-            // Exit expanded mode
-            container.classList.remove('expanded');
-            expandButton.title = "Expand chat";
-            expandButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-            `;
-        } else {
-            // Enter expanded mode
-            container.classList.add('expanded');
-            container.classList.remove('collapsed'); // Ensure it's not collapsed when expanding
-            expandButton.title = "Exit full screen";
-            expandButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
-            `;
-
-            // Load transcript if this is the first time opening
-            if (isFirstOpen) {
-                loadTranscriptOnOpen();
-                isFirstOpen = false;
-            }
-        }
-
-        // Scroll to bottom after mode change
-        setTimeout(() => {
-            chatDisplay.scrollTop = chatDisplay.scrollHeight;
-        }, 100);
     }
 
     function setInitialMessage() {

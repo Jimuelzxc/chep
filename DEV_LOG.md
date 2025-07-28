@@ -1,32 +1,38 @@
+## ✅ Rules:
+
+0. **Whenever I share or mention this DEV_LOG.md issues, bugs, feature requests, or general notes, automatically add them here.**
+1. **Rewrite users unclear thoughts into clear, concise wording.**
+2. **Organize into these sections:**
+   - **Bugs**
+   - **Feature Requests**
+   - **General Notes**
+3. **Status indicators:**
+   - ❌ = Pending  
+   - ✅ = Completed  
+4. **Do NOT fix anything yet.**  
+   Only log information for future reference.
+
+---
+
+
+
+
 # DEV_LOG - Development Log
 
 
 This file tracks bugs, feature requests, and general notes for future reference and will be addressed systematically when the time comes.
 
 
-## ✅ Rules:
-
-1. **Whenever I share or mention this DEV_LOG.md issues, bugs, feature requests, or general notes, automatically add them here.**
-2. **Rewrite users unclear thoughts into clear, concise wording.**
-3. **Organize into these sections:**
-   - **Bugs**
-   - **Feature Requests**
-   - **General Notes**
-4. **Status indicators:**
-   - ❌ = Pending  
-   - ✅ = Completed  
-5. **Do NOT fix anything yet.**  
-   Only log information for future reference.
-
----
 
 ## Bugs
 *Issues that need to be fixed*
 
 
+- ❌ **Settings Icons are Not Visually Appealing:** The current icons used for settings are not well-designed and should be replaced with improved versions.
 - ✅ **AI Hallucinates Timestamps on Follow-up Questions:** When asking a follow-up question about a specific idea from the initial summary, the AI generates timestamps that do not exist in the video transcript. This occurs even when the initial summary is accurate.
 - ✅ **State Not Resetting on New Video:** The application state, including the chat history and transcript data, does not reset when navigating to a new YouTube video on the same tab. The data from the previous video persists. (Fix implemented by adding a URL change listener. Ready for verification.)
 - ✅ **Transcript Toggle Requires Chat Interaction:** The transcript does not automatically appear when clicking the toggle button. Currently, users must enter a chat message first before the transcript becomes visible. The transcript should display immediately when the toggle is activated.
+- ❌ **UI Issues in Light Mode:** The user interface has visual problems when the system is switched to light mode, resulting in a poor user experience.
 
 ## Feature Requests
 *New functionality to be implemented*
@@ -40,6 +46,5 @@ This file tracks bugs, feature requests, and general notes for future reference 
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*
 
+- ✅ **Removed Fullscreen Mode:** The expandable/fullscreen chat interface has been removed to simplify the user experience.
 - ✅ **Simplify API Providers:** Refactor the codebase to remove support for other API providers, concentrating exclusively on Gemini and OpenAI to streamline development and reduce complexity.
-
-
