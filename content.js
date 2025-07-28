@@ -307,7 +307,7 @@ function createAICompanionUI() {
     // --- Initialize Settings Manager and AI Service ---
     const settingsManager = new window.SettingsManager();
     const aiService = new window.AIService(settingsManager);
-    
+
     // --- Get Element References ---
     const header = container.querySelector('.ai-header');
     const headerLeft = container.querySelector('.ai-header-left');
@@ -318,6 +318,8 @@ function createAICompanionUI() {
     const chatSendButton = document.getElementById('chat-send-btn-ext');
     let isFirstOpen = true;
     let chatHistory = []; // Store conversation history
+    let isUserScrolling = false; // Track if user is manually scrolling
+    let autoScrollEnabled = true; // Track if auto-scroll should be enabled
 
     // --- Event Listeners ---
     chatDisplay.addEventListener('click', (e) => {
@@ -330,6 +332,28 @@ function createAICompanionUI() {
                 player.play();
             }
         }
+    });
+
+    // Add scroll detection to handle manual scrolling during streaming
+    let scrollTimeout;
+    chatDisplay.addEventListener('scroll', () => {
+        const isAtBottom = chatDisplay.scrollTop + chatDisplay.clientHeight >= chatDisplay.scrollHeight - 5;
+        
+        if (!isAtBottom) {
+            // User scrolled up, disable auto-scroll
+            isUserScrolling = true;
+            autoScrollEnabled = false;
+        } else {
+            // User scrolled back to bottom, re-enable auto-scroll
+            isUserScrolling = false;
+            autoScrollEnabled = true;
+        }
+
+        // Clear existing timeout and set a new one
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            isUserScrolling = false;
+        }, 150);
     });
 
     headerLeft.onclick = async () => {
@@ -368,22 +392,22 @@ function createAICompanionUI() {
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (!settingsManager.get('enableKeyboardShortcuts')) return;
-        
+
         // Only activate shortcuts when not typing in input fields
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        
+
         // Ctrl/Cmd + Shift + A: Toggle AI panel
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'A') {
             e.preventDefault();
             headerLeft.click();
         }
-        
+
         // Ctrl/Cmd + Shift + S: Open settings
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'S') {
             e.preventDefault();
             settingsManager.showSettings();
         }
-        
+
         // Focus chat input when AI panel is open
         if (e.key === '/' && !container.classList.contains('collapsed')) {
             e.preventDefault();
@@ -488,7 +512,7 @@ function createAICompanionUI() {
         // Check if AI provider is configured
         const provider = settingsManager.get('aiProvider');
         const isConfigured = checkAIProviderConfiguration(provider);
-        
+
         if (!isConfigured) {
             appendChatMessage("⚠️ AI provider not configured. Please go to Settings and add your API key.", 'ai');
             return;
@@ -507,8 +531,8 @@ function createAICompanionUI() {
         try {
             // Use the AI service to get streaming response
             const responseStream = await aiService.sendMessage(
-                transcript, 
-                message, 
+                transcript,
+                message,
                 chatHistory.slice(-settingsManager.get('maxChatHistory'))
             );
 
@@ -520,12 +544,12 @@ function createAICompanionUI() {
             for await (const chunk of responseStream) {
                 fullResponse += chunk;
                 aiBubble.innerHTML = parseMarkdown(fullResponse);
-                
-                // Auto-scroll if enabled
-                if (settingsManager.get('autoScrollToBottom')) {
+
+                // Only auto-scroll if user hasn't manually scrolled up and auto-scroll is enabled
+                if (settingsManager.get('autoScrollToBottom') && autoScrollEnabled && !isUserScrolling) {
                     chatDisplay.scrollTop = chatDisplay.scrollHeight;
                 }
-                
+
                 // Add typing delay if configured
                 const typingSpeed = settingsManager.get('typingSpeed');
                 if (typingSpeed > 0) {
@@ -574,7 +598,12 @@ function createAICompanionUI() {
 
         messageEl.appendChild(bubbleEl);
         chatDisplay.appendChild(messageEl);
-        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        
+        // Only auto-scroll if user hasn't manually scrolled up
+        if (autoScrollEnabled && !isUserScrolling) {
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+        
         return bubbleEl;
     }
 
@@ -591,7 +620,12 @@ function createAICompanionUI() {
 
         messageEl.appendChild(bubbleEl);
         chatDisplay.appendChild(messageEl);
-        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        
+        // Only auto-scroll if user hasn't manually scrolled up
+        if (autoScrollEnabled && !isUserScrolling) {
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+        
         return messageEl;
     }
 
@@ -611,7 +645,12 @@ function createAICompanionUI() {
 
         messageEl.appendChild(bubbleEl);
         chatDisplay.appendChild(messageEl);
-        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        
+        // Only auto-scroll if user hasn't manually scrolled up
+        if (autoScrollEnabled && !isUserScrolling) {
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+        
         return messageEl;
     }
 

@@ -1,28 +1,23 @@
-## ✅ Rules:
+# DEV_LOG - Development Log
+This file tracks bugs, feature requests, and general notes for future reference and will be addressed systematically when the time comes.
 
+
+
+**AI PROMPT:**  
 0. **Whenever I share or mention this DEV_LOG.md issues, bugs, feature requests, or general notes, automatically add them here.**
 1. **Rewrite users unclear thoughts into clear, concise wording.**
 2. **Organize into these sections:**
    - **Bugs**
    - **Feature Requests**
    - **General Notes**
-3. **Status indicators:**
-   - ❌ = Pending  
-   - ✅ = Completed  
-4. **Do NOT fix anything yet.**  
+3. **Do NOT fix anything yet.**  
    Only log information for future reference.
 
----
 
 
-
-
-# DEV_LOG - Development Log
-
-
-This file tracks bugs, feature requests, and general notes for future reference and will be addressed systematically when the time comes.
-
-
+**Status indicators:**
+- ❌ = Pending  
+- ✅ = Completed  
 
 ## Bugs
 *Issues that need to be fixed*
@@ -33,6 +28,7 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ✅ **State Not Resetting on New Video:** The application state, including the chat history and transcript data, does not reset when navigating to a new YouTube video on the same tab. The data from the previous video persists. (Fix implemented by adding a URL change listener. Ready for verification.)
 - ✅ **Transcript Toggle Requires Chat Interaction:** The transcript does not automatically appear when clicking the toggle button. Currently, users must enter a chat message first before the transcript becomes visible. The transcript should display immediately when the toggle is activated.
 - ❌ **UI Issues in Light Mode:** The user interface has visual problems when the system is switched to light mode, resulting in a poor user experience.
+- ✅ **Scrolling Disabled During Streaming:** Users cannot scroll up in the chat interface while the AI's response is being streamed. Scrolling should be possible even when the response is not yet complete. (Fixed by implementing scroll detection that disables auto-scroll when user manually scrolls up and re-enables it when they return to bottom)
 
 ## Feature Requests
 *New functionality to be implemented*
