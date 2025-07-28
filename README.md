@@ -137,8 +137,8 @@ Access settings by clicking the gear icon (⚙️) in the AI Assistant header:
 - Verify the selected model is available for your API key
 
 **Extension not loading**
-- Ensure Developer mode is enabled in Chrome extensions
-- Try reloading the extension from chrome://extensions/
+- Ensure Developer mode is enabled in your browser's extension settings
+- Try reloading the extension from `about:addons` (Firefox) or `chrome://extensions` (Chrome)
 
 ## Contributing
 
@@ -148,7 +148,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 1. Clone the repository
 2. Make your changes
-3. Test the extension by loading it unpacked in Chrome
+3. Test the extension by loading it unpacked in your browser
 4. Submit a pull request
 
 ## License

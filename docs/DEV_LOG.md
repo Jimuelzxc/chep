@@ -39,6 +39,7 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ✅ **Add Loading Animation for Data Fetching:** Implement visual loading indicators when the AI is processing requests and fetching transcript data to improve user experience and provide feedback during wait times. (Implemented with spinning loader for transcript loading and typing dots for AI responses)
 - ✅ **Improve Initial Transcript Message:** Change the generic "Transcript loaded! Ask me anything about this video." message to something more engaging and informative. (Updated to "🎬 Ready to discuss this video! What would you like to know?" with emojis and better messaging throughout)
 - ✅ **Add OpenRouter as AI Provider:** Investigate and integrate OpenRouter to expand the available AI model options.
+- ✅ **Reorganize Settings Panel Layout:** Improve the settings user experience by moving the AI Configuration section to the top of the settings panel, above Appearance and Features sections, since API configuration is the most critical setting for users.
 
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*

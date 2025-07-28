@@ -119,6 +119,63 @@ class SettingsManager {
                     </div>
                     <div class="settings-content">
                         <div class="settings-section">
+                            <h3>AI Configuration</h3>
+                            <div class="setting-item">
+                                <label for="ai-provider-select">AI Provider:</label>
+                                <select id="ai-provider-select">
+                                    <option value="openai">OpenAI</option>
+                                    <option value="gemini">Google Gemini</option>
+                                    <option value="openrouter">OpenRouter</option>
+                                </select>
+                            </div>
+                            
+                            <!-- OpenAI Settings -->
+                            <div id="openai-settings" class="provider-settings">
+                                <div class="setting-item">
+                                    <label for="openai-api-key">OpenAI API Key:</label>
+                                    <input type="password" id="openai-api-key" value="${this.settings.openaiApiKey}" placeholder="sk-...">
+                                </div>
+                                <div class="setting-item">
+                                    <label for="openai-model">Model:</label>
+                                    <select id="openai-model">
+                                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                                        <option value="gpt-4o">GPT-4o</option>
+                                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Gemini Settings -->
+                            <div id="gemini-settings" class="provider-settings">
+                                <div class="setting-item">
+                                    <label for="gemini-api-key">Gemini API Key:</label>
+                                    <input type="password" id="gemini-api-key" value="${this.settings.geminiApiKey}" placeholder="AI...">
+                                </div>
+                                <div class="setting-item">
+                                    <label for="gemini-model">Model:</label>
+                                    <select id="gemini-model">
+                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                                        <option value="gemini-pro">Gemini Pro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- OpenRouter Settings -->
+                            <div id="openrouter-settings" class="provider-settings">
+                                <div class="setting-item">
+                                    <label for="openrouter-api-key">OpenRouter API Key:</label>
+                                    <input type="password" id="openrouter-api-key" value="${this.settings.openrouterApiKey}" placeholder="sk-or-...">
+                                </div>
+                                <div class="setting-item">
+                                    <label for="openrouter-model">Model:</label>
+                                    <input type="text" id="openrouter-model" value="${this.settings.openrouterModel}" placeholder="google/gemini-flash-1.5">
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="settings-section">
                             <h3>Appearance</h3>
                             <div class="setting-item">
                                 <label for="theme-select">Theme:</label>
@@ -184,64 +241,6 @@ class SettingsManager {
                                 <label for="sound-notifications-toggle">Sound Notifications:</label>
                                 <input type="checkbox" id="sound-notifications-toggle" ${this.settings.soundNotifications ? 'checked' : ''}>
                             </div>
-                        </div>
-
-                        <div class="settings-section">
-                            <h3>AI Configuration</h3>
-                            <div class="setting-item">
-                                <label for="ai-provider-select">AI Provider:</label>
-                                <select id="ai-provider-select">
-                                    <option value="openai">OpenAI</option>
-                                    <option value="gemini">Google Gemini</option>
-                                    <option value="openrouter">OpenRouter</option>
-                                </select>
-                            </div>
-                            
-                            <!-- OpenAI Settings -->
-                            <div id="openai-settings" class="provider-settings">
-                                <div class="setting-item">
-                                    <label for="openai-api-key">OpenAI API Key:</label>
-                                    <input type="password" id="openai-api-key" value="${this.settings.openaiApiKey}" placeholder="sk-...">
-                                </div>
-                                <div class="setting-item">
-                                    <label for="openai-model">Model:</label>
-                                    <select id="openai-model">
-                                        <option value="gpt-4o-mini">GPT-4o Mini</option>
-                                        <option value="gpt-4o">GPT-4o</option>
-                                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Gemini Settings -->
-                            <div id="gemini-settings" class="provider-settings">
-                                <div class="setting-item">
-                                    <label for="gemini-api-key">Gemini API Key:</label>
-                                    <input type="password" id="gemini-api-key" value="${this.settings.geminiApiKey}" placeholder="AI...">
-                                </div>
-                                <div class="setting-item">
-                                    <label for="gemini-model">Model:</label>
-                                    <select id="gemini-model">
-                                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                                        <option value="gemini-pro">Gemini Pro</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- OpenRouter Settings -->
-                            <div id="openrouter-settings" class="provider-settings">
-                                <div class="setting-item">
-                                    <label for="openrouter-api-key">OpenRouter API Key:</label>
-                                    <input type="password" id="openrouter-api-key" value="${this.settings.openrouterApiKey}" placeholder="sk-or-...">
-                                </div>
-                                <div class="setting-item">
-                                    <label for="openrouter-model">Model:</label>
-                                    <input type="text" id="openrouter-model" value="${this.settings.openrouterModel}" placeholder="google/gemini-flash-1.5">
-                                </div>
-                            </div>
-
                         </div>
                     </div>
                     <div class="settings-footer">
