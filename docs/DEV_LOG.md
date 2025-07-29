@@ -29,6 +29,9 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ✅ **Transcript Toggle Requires Chat Interaction:** The transcript does not automatically appear when clicking the toggle button. Currently, users must enter a chat message first before the transcript becomes visible. The transcript should display immediately when the toggle is activated.
 - ❌ **UI Issues in Light Mode:** The user interface has visual problems when the system is switched to light mode, resulting in a poor user experience.
 - ✅ **Scrolling Disabled During Streaming:** Users cannot scroll up in the chat interface while the AI's response is being streamed. Scrolling should be possible even when the response is not yet complete. (Fixed by implementing scroll detection that disables auto-scroll when user manually scrolls up and re-enables it when they return to bottom)
+- ✅ **System Prompt Too Restrictive:** The AI refuses to answer general knowledge questions about topics mentioned in the video because the system prompt forces it to only use transcript information. For example, if a video is about "String Theory" and user asks "What is string theory?", the AI says it's not in the transcript instead of providing helpful general knowledge while also referencing what the video specifically covers.
+
+
 
 ## Feature Requests
 *New functionality to be implemented*
@@ -40,6 +43,12 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ✅ **Improve Initial Transcript Message:** Change the generic "Transcript loaded! Ask me anything about this video." message to something more engaging and informative. (Updated to "🎬 Ready to discuss this video! What would you like to know?" with emojis and better messaging throughout)
 - ✅ **Add OpenRouter as AI Provider:** Investigate and integrate OpenRouter to expand the available AI model options.
 - ✅ **Reorganize Settings Panel Layout:** Improve the settings user experience by moving the AI Configuration section to the top of the settings panel, above Appearance and Features sections, since API configuration is the most critical setting for users.
+
+- ✅ **Implement Suggested Prompts/Quick Action Buttons:**
+    - Display dynamic suggestions: Show contextually relevant prompt suggestions (e.g., "Summarize this video," "Key takeaways," "What is the main topic?") above the chat input field.
+    - Allow user customization: Enable users to define their own custom quick action buttons or frequently used prompts in the settings.
+    - Integrate with chat history: Suggestions could also be based on previous turns in the conversation or common follow-up questions.
+    - Hide suggestions after selection: Automatically hide the suggested prompt buttons once a user clicks on one to streamline the interface.
 
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*

@@ -242,6 +242,34 @@ function createAICompanionUI() {
             40% { opacity: 1; }
         }
 
+        /* Suggested Prompts Styles */
+        .suggested-prompts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            justify-content: center;
+        }
+        .suggested-prompt-button {
+            background-color: var(--yt-spec-background-elevation-2);
+            color: var(--yt-spec-text-primary);
+            border: 1px solid var(--yt-spec-border-color);
+            border-radius: 16px;
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .suggested-prompt-button:hover {
+            background-color: var(--yt-spec-blue-text);
+            border-color: var(--yt-spec-blue-text);
+            color: white;
+        }
+        .suggested-prompt-button:active {
+            transform: translateY(1px);
+        }
+
     `;
     document.head.appendChild(style);
 
@@ -294,6 +322,7 @@ function createAICompanionUI() {
         </div>
         <div class="ai-panel">
             <div id="chat-display-ext"></div>
+            <div class="suggested-prompts-container" id="suggested-prompts-ext"></div>
             <div class="chat-input-container">
                 <input type="text" id="chat-input-ext" placeholder="Ask a question...">
                 <button id="chat-send-btn-ext" title="Ask">
@@ -316,6 +345,7 @@ function createAICompanionUI() {
     const chatDisplay = document.getElementById('chat-display-ext');
     const chatInput = document.getElementById('chat-input-ext');
     const chatSendButton = document.getElementById('chat-send-btn-ext');
+    const suggestedPromptsContainer = document.getElementById('suggested-prompts-ext');
     let isFirstOpen = true;
     let chatHistory = []; // Store conversation history
     let isUserScrolling = false; // Track if user is manually scrolling
@@ -331,6 +361,14 @@ function createAICompanionUI() {
                 player.currentTime = seconds;
                 player.play();
             }
+        }
+    });
+
+    suggestedPromptsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('suggested-prompt-button')) {
+            chatInput.value = e.target.textContent;
+            hideSuggestedPrompts(); // Hide suggestions after click
+            handleChat();
         }
     });
 
@@ -420,6 +458,28 @@ function createAICompanionUI() {
         chatHistory = [];
         chatDisplay.innerHTML = '';
         appendChatMessage("Ready to discuss this video! What would you like to know?", 'ai');
+        displaySuggestedPrompts();
+    }
+
+    function displaySuggestedPrompts() {
+        suggestedPromptsContainer.innerHTML = ''; // Clear existing suggestions
+        suggestedPromptsContainer.style.display = 'flex'; // Ensure it's visible
+        const defaultPrompts = [
+            "Summarize this video",
+            "What are the key takeaways?",
+            "What is the main topic?"
+        ];
+
+        defaultPrompts.forEach(prompt => {
+            const button = document.createElement('button');
+            button.className = 'suggested-prompt-button';
+            button.textContent = prompt;
+            suggestedPromptsContainer.appendChild(button);
+        });
+    }
+
+    function hideSuggestedPrompts() {
+        suggestedPromptsContainer.style.display = 'none';
     }
 
     function parseMarkdown(text) {
@@ -682,15 +742,7 @@ function createAICompanionUI() {
             // Transcript already available
             appendChatMessage("Ready to discuss this video! What would you like to know?", 'ai');
         }
-    }
-
-    function setInitialMessage() {
-        const transcript = getTranscriptText();
-        if (transcript) {
-            appendChatMessage("Ask me anything about this video!", 'ai');
-        } else {
-            appendChatMessage("Open the transcript to start chatting with the video.", 'ai');
-        }
+        displaySuggestedPrompts();
     }
 }
 
