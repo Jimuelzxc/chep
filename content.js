@@ -226,9 +226,22 @@ function createAICompanionUI() {
             color: var(--yt-spec-blue-text);
             text-decoration: none;
             cursor: pointer;
+            background: rgba(62, 166, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(62, 166, 255, 0.2);
         }
         .yt-timestamp-link:hover {
-            text-decoration: underline;
+            background: rgba(62, 166, 255, 0.2);
+            border-color: rgba(62, 166, 255, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(62, 166, 255, 0.3);
+        }
+        .yt-timestamp-link:active {
+            transform: translateY(0);
+            background: rgba(62, 166, 255, 0.3);
         }
         
         /* Loading Animation Styles */
@@ -382,6 +395,12 @@ function createAICompanionUI() {
             const seconds = e.target.dataset.seconds;
             const player = document.querySelector('.html5-main-video');
             if (player && seconds) {
+                // Add visual feedback
+                e.target.style.background = 'rgba(62, 166, 255, 0.4)';
+                setTimeout(() => {
+                    e.target.style.background = 'rgba(62, 166, 255, 0.1)';
+                }, 200);
+                
                 player.currentTime = seconds;
                 player.play();
             }
@@ -539,15 +558,28 @@ function createAICompanionUI() {
         html = html.replace(/^###\s+(.*)/gm, '<h3>$1</h3>').replace(/^##\s+(.*)/gm, '<h2>$1</h2>').replace(/^#\s+(.*)/gm, '<h1>$1</h1>');
         html = html.replace(/\*\*(.*?)\*\*|__(.*?)__/g, '<strong>$1$2</strong>').replace(/\*(.*?)\*|_(.*?)_/g, '<em>$1$2</em>');
 
-        html = html.replace(/\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g, (match) => {
-            const parts = match.split(':').map(Number);
+        // Enhanced timestamp parsing with better validation and formatting
+        html = html.replace(/\[(\d{1,2}:\d{2}(?::\d{2})?)\]|\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g, (match, bracketed, unbracketed) => {
+            const timestamp = bracketed || unbracketed;
+            const parts = timestamp.split(':').map(Number);
             let seconds = 0;
+            
+            // Validate timestamp format
             if (parts.length === 3) { // HH:MM:SS
-                seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+                if (parts[0] >= 0 && parts[1] < 60 && parts[2] < 60) {
+                    seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+                }
             } else if (parts.length === 2) { // MM:SS
-                seconds = parts[0] * 60 + parts[1];
+                if (parts[0] >= 0 && parts[1] < 60) {
+                    seconds = parts[0] * 60 + parts[1];
+                }
             }
-            return `<a href="#" class="yt-timestamp-link" data-seconds="${seconds}">${match}</a>`;
+            
+            // Only create clickable links for valid timestamps
+            if (seconds > 0) {
+                return `<a href="#" class="yt-timestamp-link" data-seconds="${seconds}">${timestamp}</a>`;
+            }
+            return match; // Return original if invalid
         });
 
         html = html.replace(/\n/g, '<br>');
@@ -558,6 +590,22 @@ function createAICompanionUI() {
         const segments = document.querySelectorAll('ytd-transcript-segment-renderer .segment');
         if (segments.length === 0) { return null; }
         return Array.from(segments).map(el => el.innerText.trim()).join(' ');
+    }
+
+    function getTimestampContext(timestamp, transcript) {
+        if (!transcript || !settingsManager.get('enhancedTimestamps')) return '';
+        
+        // Find the context around the timestamp in the transcript
+        const timestampIndex = transcript.indexOf(timestamp);
+        if (timestampIndex === -1) return '';
+        
+        // Get ~50 characters before and after the timestamp
+        const start = Math.max(0, timestampIndex - 50);
+        const end = Math.min(transcript.length, timestampIndex + timestamp.length + 100);
+        const context = transcript.substring(start, end).trim();
+        
+        // Clean up the context
+        return context.replace(/\s+/g, ' ').substring(0, 150) + (context.length > 150 ? '...' : '');
     }
 
     function autoOpenTranscript() {

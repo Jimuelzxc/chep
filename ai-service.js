@@ -19,8 +19,47 @@ class AIService {
         }
     }
 
+    extractTimestamps(transcript) {
+        const timestampPattern = /\b(\d{1,2}:\d{2}(?::\d{2})?)\b/g;
+        const timestamps = [...transcript.matchAll(timestampPattern)]
+            .map(match => match[1])
+            .filter(timestamp => {
+                // Validate timestamp format
+                const parts = timestamp.split(':').map(Number);
+                if (parts.length === 3) { // HH:MM:SS
+                    return parts[0] >= 0 && parts[1] < 60 && parts[2] < 60;
+                } else if (parts.length === 2) { // MM:SS
+                    return parts[0] >= 0 && parts[1] < 60;
+                }
+                return false;
+            });
+        
+        // Remove duplicates and sort chronologically
+        return [...new Set(timestamps)].sort((a, b) => {
+            const aSeconds = this.timestampToSeconds(a);
+            const bSeconds = this.timestampToSeconds(b);
+            return aSeconds - bSeconds;
+        });
+    }
+
+    timestampToSeconds(timestamp) {
+        const parts = timestamp.split(':').map(Number);
+        if (parts.length === 3) {
+            return parts[0] * 3600 + parts[1] * 60 + parts[2];
+        } else if (parts.length === 2) {
+            return parts[0] * 60 + parts[1];
+        }
+        return 0;
+    }
+
     buildSystemPrompt(transcript) {
-        return `You are a helpful YouTube video assistant.
+        const customPrompt = this.settingsManager.get('customPrompt');
+        
+        // Extract and validate timestamps from transcript
+        const availableTimestamps = this.extractTimestamps(transcript);
+        const hasTimestamps = availableTimestamps.length > 0;
+        
+        let systemPrompt = `You are a helpful YouTube video assistant.
 
 Your inputs are:
 1. The full transcript of the video (below, enclosed in triple dashes).
@@ -28,15 +67,40 @@ Your inputs are:
 
 Your job is to:
 - **Answer the question concisely and accurately**, prioritizing information found in the transcript, but also using general knowledge when appropriate.
-- **Maintain conversation context** by referring to previous exchanges when relevant.
-- **Cite evidence by quoting the relevant text and including the exact timestamp that appears at the beginning of that quote in the transcript.** Timestamps must be copied verbatim from the transcript.
+- **Maintain conversation context** by referring to previous exchanges when relevant.`;
+
+        if (hasTimestamps) {
+            const enhancedTimestamps = this.settingsManager.get('enhancedTimestamps');
+            systemPrompt += `
+- **Cite evidence with timestamps** by quoting relevant text and including the exact timestamp from the transcript. Format timestamps as clickable links like this: [0:45] or [1:23:45].
+- **Only use timestamps that actually exist in the transcript** - available timestamps include: ${availableTimestamps.slice(0, 10).join(', ')}${availableTimestamps.length > 10 ? '...' : ''}`;
+            
+            if (enhancedTimestamps) {
+                systemPrompt += `
+- **Provide context for timestamps** by briefly describing what happens at that moment in the video.
+- **When discussing a topic that spans multiple timestamps**, mention the time range (e.g., "from [2:15] to [4:30]").`;
+            }
+        } else {
+            systemPrompt += `
+- **Quote relevant sections** from the transcript to support your answers, but note that this transcript doesn't include timestamps.`;
+        }
+
+        systemPrompt += `
 - If the transcript does not contain the information needed, say so and explain why.
 - Never invent or hallucinate any facts. Do not make up timestamps.
+- When referencing multiple parts of the video, organize your response chronologically when possible.`;
 
-Transcript:
+        // Add custom behavior instructions if provided
+        if (customPrompt && customPrompt.trim()) {
+            systemPrompt += `\n\nAdditional behavior instructions: ${customPrompt.trim()}`;
+        }
+
+        systemPrompt += `\n\nTranscript:
 ---
 ${transcript}
 ---`;
+
+        return systemPrompt;
     }
 
     async sendOpenAIMessage(transcript, message, history) {

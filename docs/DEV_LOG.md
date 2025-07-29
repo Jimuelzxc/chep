@@ -51,6 +51,8 @@ This file tracks bugs, feature requests, and general notes for future reference 
     - Integrate with chat history: Suggestions could also be based on previous turns in the conversation or common follow-up questions.
     - Hide suggestions after selection: Automatically hide the suggested prompt buttons once a user clicks on one to streamline the interface.
 
+- ✅ **Custom Prompts - User-defined AI Behavior:** Add a textarea field in the AI Configuration section that allows users to define custom system prompts or behavior instructions for the AI. This would let users specify how they want the AI to respond (e.g., "respond in simple English," "be more concise," "explain like I'm 5," etc.). The custom prompt would be prepended to all AI requests to modify the AI's response style and behavior according to user preferences.
+
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*
 

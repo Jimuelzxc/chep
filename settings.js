@@ -7,6 +7,7 @@ class SettingsManager {
             chatHeight: 280,
             fontSize: 14,
             enableTimestampLinks: true,
+            enhancedTimestamps: true,
             typingSpeed: 50, // milliseconds delay between chunks
             maxChatHistory: 50,
             showLoadingAnimations: true,
@@ -22,6 +23,7 @@ class SettingsManager {
             geminiModel: 'gemini-1.5-flash',
             openrouterApiKey: '',
             openrouterModel: 'google/gemini-flash-1.5',
+            customPrompt: '',
         };
         this.settings = { ...this.defaultSettings };
         this.loadSettings();
@@ -90,8 +92,8 @@ class SettingsManager {
         }
 
         // Dispatch settings change event
-        window.dispatchEvent(new CustomEvent('ai-settings-changed', { 
-            detail: this.settings 
+        window.dispatchEvent(new CustomEvent('ai-settings-changed', {
+            detail: this.settings
         }));
     }
 
@@ -174,6 +176,11 @@ class SettingsManager {
                                 </div>
                             </div>
 
+                            <div class="setting-item">
+                                <label for="custom-prompt">Custom AI Behavior:</label>
+                                <textarea id="custom-prompt" placeholder="Enter custom instructions for the AI (e.g., 'respond in simple English', 'be more concise', 'explain like I'm 5')" rows="3">${this.settings.customPrompt}</textarea>
+                            </div>
+
                         </div>
                         <div class="settings-section">
                             <h3>Appearance</h3>
@@ -224,6 +231,10 @@ class SettingsManager {
                             <div class="setting-item">
                                 <label for="timestamp-links-toggle">Enable Timestamp Links:</label>
                                 <input type="checkbox" id="timestamp-links-toggle" ${this.settings.enableTimestampLinks ? 'checked' : ''}>
+                            </div>
+                            <div class="setting-item">
+                                <label for="enhanced-timestamps-toggle">Enhanced Timestamp Context:</label>
+                                <input type="checkbox" id="enhanced-timestamps-toggle" ${this.settings.enhancedTimestamps ? 'checked' : ''}>
                             </div>
                             <div class="setting-item">
                                 <label for="loading-animations-toggle">Show Loading Animations:</label>
@@ -363,7 +374,8 @@ class SettingsManager {
             }
 
             .setting-item select,
-            .setting-item input[type="text"] {
+            .setting-item input[type="text"],
+            .setting-item textarea {
                 background: var(--yt-spec-background-elevation-2, #3f3f3f);
                 border: 1px solid var(--yt-spec-border-color, #535353);
                 color: var(--yt-spec-text-primary, #ffffff);
@@ -371,6 +383,13 @@ class SettingsManager {
                 border-radius: 6px;
                 font-size: 14px;
                 min-width: 120px;
+                font-family: inherit;
+                resize: vertical;
+            }
+
+            .setting-item textarea {
+                min-width: 300px;
+                max-width: 100%;
             }
 
             .setting-item input[type="range"] {
@@ -494,6 +513,7 @@ class SettingsManager {
 
             .setting-item input[type="password"]:focus,
             .setting-item input[type="text"]:focus,
+            .setting-item textarea:focus,
             .setting-item select:focus {
                 outline: none;
                 border-color: var(--yt-spec-blue-text, #3ea6ff);
@@ -517,7 +537,7 @@ class SettingsManager {
         document.getElementById('auto-scroll-toggle').checked = this.settings.autoScrollToBottom;
         document.getElementById('keyboard-shortcuts-toggle').checked = this.settings.enableKeyboardShortcuts;
         document.getElementById('sound-notifications-toggle').checked = this.settings.soundNotifications;
-        
+
         // Set AI provider values
         document.getElementById('ai-provider-select').value = this.settings.aiProvider;
         document.getElementById('openai-api-key').value = this.settings.openaiApiKey;
@@ -526,7 +546,8 @@ class SettingsManager {
         document.getElementById('gemini-model').value = this.settings.geminiModel;
         document.getElementById('openrouter-api-key').value = this.settings.openrouterApiKey;
         document.getElementById('openrouter-model').value = this.settings.openrouterModel;
-        
+        document.getElementById('custom-prompt').value = this.settings.customPrompt;
+
         // Show/hide provider settings based on selection
         this.updateProviderVisibility(this.settings.aiProvider);
 
@@ -553,8 +574,8 @@ class SettingsManager {
         // Update value displays for sliders
         const updateSliderDisplay = (slider, valueSpan) => {
             slider.addEventListener('input', () => {
-                valueSpan.textContent = slider.value + (slider.id.includes('font-size') || slider.id.includes('chat-height') ? 'px' : 
-                                                       slider.id.includes('typing-speed') ? 'ms' : '');
+                valueSpan.textContent = slider.value + (slider.id.includes('font-size') || slider.id.includes('chat-height') ? 'px' :
+                    slider.id.includes('typing-speed') ? 'ms' : '');
             });
         };
 
@@ -616,11 +637,12 @@ class SettingsManager {
         this.settings.typingSpeed = parseInt(modal.querySelector('#typing-speed-slider').value);
         this.settings.maxChatHistory = parseInt(modal.querySelector('#max-history-slider').value);
         this.settings.enableTimestampLinks = modal.querySelector('#timestamp-links-toggle').checked;
+        this.settings.enhancedTimestamps = modal.querySelector('#enhanced-timestamps-toggle').checked;
         this.settings.showLoadingAnimations = modal.querySelector('#loading-animations-toggle').checked;
         this.settings.autoScrollToBottom = modal.querySelector('#auto-scroll-toggle').checked;
         this.settings.enableKeyboardShortcuts = modal.querySelector('#keyboard-shortcuts-toggle').checked;
         this.settings.soundNotifications = modal.querySelector('#sound-notifications-toggle').checked;
-        
+
         // AI Provider settings
         this.settings.aiProvider = modal.querySelector('#ai-provider-select').value;
         this.settings.openaiApiKey = modal.querySelector('#openai-api-key').value;
@@ -629,6 +651,7 @@ class SettingsManager {
         this.settings.geminiModel = modal.querySelector('#gemini-model').value;
         this.settings.openrouterApiKey = modal.querySelector('#openrouter-api-key').value;
         this.settings.openrouterModel = modal.querySelector('#openrouter-model').value;
+        this.settings.customPrompt = modal.querySelector('#custom-prompt').value;
 
         this.saveSettings();
     }
