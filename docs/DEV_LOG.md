@@ -30,6 +30,7 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ❌ **UI Issues in Light Mode:** The user interface has visual problems when the system is switched to light mode, resulting in a poor user experience.
 - ✅ **Scrolling Disabled During Streaming:** Users cannot scroll up in the chat interface while the AI's response is being streamed. Scrolling should be possible even when the response is not yet complete. (Fixed by implementing scroll detection that disables auto-scroll when user manually scrolls up and re-enables it when they return to bottom)
 - ✅ **System Prompt Too Restrictive:** The AI refuses to answer general knowledge questions about topics mentioned in the video because the system prompt forces it to only use transcript information. For example, if a video is about "String Theory" and user asks "What is string theory?", the AI says it's not in the transcript instead of providing helpful general knowledge while also referencing what the video specifically covers.
+- ✅ **Suggestion Buttons Not Hidden After First User Request:** The suggested prompt buttons remain visible even after the user has started chatting. The suggestion buttons should be hidden once the chat history is not empty or after the user makes their first request to avoid interface clutter. (Fixed by adding hideSuggestedPrompts() call in handleChat function after user message is processed)
 
 
 

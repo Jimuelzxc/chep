@@ -632,6 +632,10 @@ function createAICompanionUI() {
         // Add user message to history
         chatHistory.push({ role: 'user', content: message });
         appendChatMessage(message, 'user');
+        
+        // Hide suggestion buttons after first user message
+        hideSuggestedPrompts();
+        
         chatInput.value = '';
         chatSendButton.disabled = true;
 
