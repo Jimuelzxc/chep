@@ -117,6 +117,12 @@ function createAICompanionUI() {
             max-width: 85%;
             word-wrap: break-word;
         }
+        .chat-username {
+            font-size: 12px;
+            color: var(--yt-spec-text-secondary);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
         .chat-message.user { align-self: flex-end; }
         .chat-message.user .chat-bubble {
             background-color: var(--yt-spec-background-elevation-2);
@@ -653,6 +659,14 @@ function createAICompanionUI() {
     function appendChatMessage(text, sender) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${sender}`;
+
+        // Add username for AI messages
+        if (sender === 'ai') {
+            const usernameEl = document.createElement('div');
+            usernameEl.className = 'chat-username';
+            usernameEl.textContent = 'chep.ai';
+            messageEl.appendChild(usernameEl);
+        }
 
         const bubbleEl = document.createElement('div');
         bubbleEl.className = 'chat-bubble';
