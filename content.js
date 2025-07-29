@@ -292,14 +292,8 @@ function createAICompanionUI() {
         <div class="ai-header">
             <div class="ai-header-left">
                 <div class="ai-header-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" fill="url(#gradient-fill)"></path>
-                        <path d="M5 3v4" fill="url(#gradient-fill)"></path>
-                        <path d="M19 17v4" fill="url(#gradient-fill)"></path>
-                        <path d="M3 5h4" fill="url(#gradient-fill)"></path>
-                        <path d="M17 19h4" fill="url(#gradient-fill)"></path>
-                    </svg>
-                    <span>AI Assistant</span>
+                    <img src="${chrome.runtime.getURL('assets/chep-logo.png')}" alt="Chep" style="width: 24px; height: 24px; ">
+                    <span style="font-size: 0.8em; opacity:40%; transform: translate(-6px, 2px);"> Ask about this video...</span>
                 </div>
             </div>
             <div class="ai-header-controls">
@@ -376,7 +370,7 @@ function createAICompanionUI() {
     let scrollTimeout;
     chatDisplay.addEventListener('scroll', () => {
         const isAtBottom = chatDisplay.scrollTop + chatDisplay.clientHeight >= chatDisplay.scrollHeight - 5;
-        
+
         if (!isAtBottom) {
             // User scrolled up, disable auto-scroll
             isUserScrolling = true;
@@ -396,6 +390,19 @@ function createAICompanionUI() {
 
     headerLeft.onclick = async () => {
         container.classList.toggle('collapsed');
+
+        // Update the text based on toggle state
+        const textSpan = container.querySelector('.ai-header-title span:last-child');
+        const resetBtn = container.querySelector('.reset-btn');
+
+        if (container.classList.contains('collapsed')) {
+            textSpan.textContent = ' Ask about this video...';
+            resetBtn.style.display = 'none';
+        } else {
+            textSpan.textContent = ' AI COMPANION';
+            resetBtn.style.display = 'flex';
+        }
+
         if (!container.classList.contains('collapsed') && isFirstOpen) {
             await loadTranscriptOnOpen();
             isFirstOpen = false;
@@ -457,7 +464,7 @@ function createAICompanionUI() {
     function resetChat() {
         chatHistory = [];
         chatDisplay.innerHTML = '';
-        appendChatMessage("Ready to discuss this video! What would you like to know?", 'ai');
+        appendChatMessage("What would you like to know?", 'ai');
         displaySuggestedPrompts();
     }
 
@@ -658,12 +665,12 @@ function createAICompanionUI() {
 
         messageEl.appendChild(bubbleEl);
         chatDisplay.appendChild(messageEl);
-        
+
         // Only auto-scroll if user hasn't manually scrolled up
         if (autoScrollEnabled && !isUserScrolling) {
             chatDisplay.scrollTop = chatDisplay.scrollHeight;
         }
-        
+
         return bubbleEl;
     }
 
@@ -680,12 +687,12 @@ function createAICompanionUI() {
 
         messageEl.appendChild(bubbleEl);
         chatDisplay.appendChild(messageEl);
-        
+
         // Only auto-scroll if user hasn't manually scrolled up
         if (autoScrollEnabled && !isUserScrolling) {
             chatDisplay.scrollTop = chatDisplay.scrollHeight;
         }
-        
+
         return messageEl;
     }
 
@@ -705,12 +712,12 @@ function createAICompanionUI() {
 
         messageEl.appendChild(bubbleEl);
         chatDisplay.appendChild(messageEl);
-        
+
         // Only auto-scroll if user hasn't manually scrolled up
         if (autoScrollEnabled && !isUserScrolling) {
             chatDisplay.scrollTop = chatDisplay.scrollHeight;
         }
-        
+
         return messageEl;
     }
 
@@ -734,13 +741,13 @@ function createAICompanionUI() {
             loadingBubble.remove();
 
             if (transcript) {
-                appendChatMessage("Ready to discuss this video! What would you like to know?", 'ai');
+                appendChatMessage("What would you like to know?", 'ai');
             } else {
                 appendChatMessage("⚠️ Couldn't access the transcript automatically. Please open it manually by clicking the three-dot menu (...) below the video and selecting 'Show transcript'.", 'ai');
             }
         } else {
             // Transcript already available
-            appendChatMessage("Ready to discuss this video! What would you like to know?", 'ai');
+            appendChatMessage("What would you like to know?", 'ai');
         }
         displaySuggestedPrompts();
     }
