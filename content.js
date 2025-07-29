@@ -107,6 +107,9 @@ function createAICompanionUI() {
             flex-direction: column;
             gap: 10px;
         }
+        li {
+        padding: 20px 20px; 
+        }
         .chat-message {
             display: flex;
             flex-direction: column;
@@ -114,7 +117,7 @@ function createAICompanionUI() {
         .chat-bubble {
             padding: 8px 12px;
             border-radius: 18px;
-            max-width: 85%;
+            max-width: 90%;
             word-wrap: break-word;
         }
         .chat-username {
@@ -149,10 +152,30 @@ function createAICompanionUI() {
             color: var(--yt-spec-text-primary);
             border-radius: 20px;
             font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
         }
         #chat-input-ext:focus {
             outline: none;
             border-color: var(--yt-spec-blue-text);
+            box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
+        }
+        #chat-input-ext.focus-animation {
+            animation: focusGlow 1.5s ease-out;
+        }
+        @keyframes focusGlow {
+            0% {
+                border-color: var(--yt-spec-border-color);
+                box-shadow: 0 0 0 0 rgba(62, 166, 255, 0);
+            }
+            50% {
+                border-color: var(--yt-spec-blue-text);
+                box-shadow: 0 0 0 4px rgba(62, 166, 255, 0.3);
+            }
+            100% {
+                border-color: var(--yt-spec-border-color);
+                box-shadow: 0 0 0 0 rgba(62, 166, 255, 0);
+            }
         }
         #chat-send-btn-ext {
             height: 40px;
@@ -298,12 +321,12 @@ function createAICompanionUI() {
         <div class="ai-header">
             <div class="ai-header-left">
                 <div class="ai-header-title">
-                    <img src="${chrome.runtime.getURL('assets/chep-logo.png')}" alt="Chep" style="width: 24px; height: 24px; ">
-                    <span style="font-size: 0.8em; opacity:40%; transform: translate(-6px, 2px);"> Ask about this video...</span>
+                    <img src="${chrome.runtime.getURL('assets/chep-logo.png')}" alt="Chep" style="width: 24px; height: 24px; opacity: 90%; ">
+                    <span style="font-size: 0.8em; opacity:40%; transform: translate(-4px, 2px);"> Ask a question...</span>
                 </div>
             </div>
             <div class="ai-header-controls">
-                <button class="reset-btn" title="Clear Conversation">
+                <button class="reset-btn" title="Clear Conversation" style="display: none;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -350,6 +373,7 @@ function createAICompanionUI() {
     let chatHistory = []; // Store conversation history
     let isUserScrolling = false; // Track if user is manually scrolling
     let autoScrollEnabled = true; // Track if auto-scroll should be enabled
+    let trashIconVisible = false; // Track trash icon visibility state
 
     // --- Event Listeners ---
     chatDisplay.addEventListener('click', (e) => {
@@ -399,14 +423,28 @@ function createAICompanionUI() {
 
         // Update the text based on toggle state
         const textSpan = container.querySelector('.ai-header-title span:last-child');
-        const resetBtn = container.querySelector('.reset-btn');
 
         if (container.classList.contains('collapsed')) {
-            textSpan.textContent = ' Ask about this video...';
-            resetBtn.style.display = 'none';
+            textSpan.textContent = ' Ask a question...';
+            // Hide trash icon when collapsed
+            trashIconVisible = false;
+            resetButton.style.display = 'none';
         } else {
             textSpan.textContent = ' AI COMPANION';
-            resetBtn.style.display = 'flex';
+            // Toggle trash icon visibility when expanded
+            trashIconVisible = !trashIconVisible;
+            resetButton.style.display = trashIconVisible ? 'flex' : 'none';
+
+            // Focus input and trigger animation when panel expands
+            setTimeout(() => {
+                chatInput.focus();
+                chatInput.classList.add('focus-animation');
+
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    chatInput.classList.remove('focus-animation');
+                }, 1500);
+            }, 300); // Small delay to allow panel to expand
         }
 
         if (!container.classList.contains('collapsed') && isFirstOpen) {
@@ -470,7 +508,7 @@ function createAICompanionUI() {
     function resetChat() {
         chatHistory = [];
         chatDisplay.innerHTML = '';
-        appendChatMessage("What would you like to know?", 'ai');
+        appendChatMessage("What's on your mind about this video?", 'ai');
         displaySuggestedPrompts();
     }
 
@@ -664,7 +702,7 @@ function createAICompanionUI() {
         if (sender === 'ai') {
             const usernameEl = document.createElement('div');
             usernameEl.className = 'chat-username';
-            usernameEl.textContent = 'chep.ai';
+            usernameEl.textContent = 'chep';
             messageEl.appendChild(usernameEl);
         }
 
@@ -755,13 +793,13 @@ function createAICompanionUI() {
             loadingBubble.remove();
 
             if (transcript) {
-                appendChatMessage("What would you like to know?", 'ai');
+                appendChatMessage("What's on your mind about this video?", 'ai');
             } else {
                 appendChatMessage("⚠️ Couldn't access the transcript automatically. Please open it manually by clicking the three-dot menu (...) below the video and selecting 'Show transcript'.", 'ai');
             }
         } else {
             // Transcript already available
-            appendChatMessage("What would you like to know?", 'ai');
+            appendChatMessage("What's on your mind about this video?", 'ai');
         }
         displaySuggestedPrompts();
     }
