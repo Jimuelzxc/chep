@@ -1,6 +1,10 @@
-# chep
-
-**chep** is an AI-powered Firefox extension that enhances your YouTube experience. It allows you to chat with an AI, ask questions about the video, summarize video content, and more, directly on the YouTube watch page.
+<div align="center">
+  <img src="./assets/logo-main.png" alt="There You Go Logo" width="150"/>
+  <h1>chep</h1>
+  <p>
+is an AI-powered Firefox extension that enhances your YouTube experience. It allows you to chat with an AI, ask questions about the video, summarize video content, and more, directly on the YouTube watch page.
+  </p>
+</div>
 
 
 ## Installation
