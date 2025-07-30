@@ -6,28 +6,17 @@ is an AI-powered Firefox extension that enhances your YouTube experience. It all
   </p>
 </div>
 
+<div align="center">
+  <img src="/assets/chep-demo.gif" alt="chep-demo"/>
+</div>
+
 
 ## Features
 
-### Enhanced Timestamp Handling
-- **Smart timestamp validation** - Only creates clickable links for valid timestamps
-- **Improved timestamp formatting** - Supports both [0:45] and 0:45 formats
-- **Visual feedback** - Timestamps have enhanced styling with hover effects
-- **Context awareness** - AI provides better context around timestamp references
-- **Jump confirmation** - Optional feedback when jumping to timestamps
-- **Chronological organization** - AI responses can be organized by timeline
-
 ### AI Integration
 - Support for multiple AI providers (OpenAI, Google Gemini, OpenRouter)
+- Timestamp in response.
 - Customizable AI behavior and prompts
-- Conversation history management
-- Streaming responses with typing indicators
-
-### User Experience
-- Collapsible interface with smooth animations
-- Keyboard shortcuts for quick access
-- Auto-scroll with manual override detection
-- Suggested prompts for common questions
 - Settings panel with extensive customization options
 
 ## Installation
