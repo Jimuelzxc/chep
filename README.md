@@ -6,9 +6,10 @@ is an AI-powered Firefox extension that enhances your YouTube experience. It all
   </p>
 </div>
 
-<div align="center">
-  <img src="/assets/chep-demo.gif" alt="chep-demo"/>
-</div>
+  <img src="/assets/chep-demo.gif" alt="chep-demo" style="width: 100%; max-width: 800px; margin: 20px 0;"/>
+
+
+
 
 
 ## Features
