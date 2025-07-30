@@ -6,7 +6,7 @@ is an AI-powered Firefox extension that enhances your YouTube experience. It all
   </p>
 </div>
 
-  <img src="/assets/chep-demo.gif" alt="chep-demo" style="height: 400px; width: 100%; margin: 20px 0;"/>
+  <img src="/assets/chep-demo.gif" alt="chep-demo" style="height: 550px; width: 100%; margin: 20px 0;"/>
 
 
 
