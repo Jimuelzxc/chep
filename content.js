@@ -411,10 +411,10 @@ function createAICompanionUI() {
 
     // --- Initialize Mini LLM Popup ---
     let miniPopupInitialized = false;
-    
+
     function initializeMiniPopupIfEnabled() {
         if (settingsManager.get('enableMiniPopup') && !miniPopupInitialized) {
-            initializeMiniLLMPopup(settingsManager, aiService);
+            initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText);
             miniPopupInitialized = true;
         } else if (!settingsManager.get('enableMiniPopup') && miniPopupInitialized) {
             // Remove popup if it exists
@@ -425,10 +425,10 @@ function createAICompanionUI() {
             miniPopupInitialized = false;
         }
     }
-    
+
     // Initialize on load
     initializeMiniPopupIfEnabled();
-    
+
     // Listen for settings changes
     window.addEventListener('ai-settings-changed', () => {
         initializeMiniPopupIfEnabled();
@@ -461,7 +461,7 @@ function createAICompanionUI() {
                 setTimeout(() => {
                     e.target.style.background = 'rgba(62, 166, 255, 0.1)';
                 }, 200);
-                
+
                 player.currentTime = seconds;
                 player.play();
             }
@@ -603,12 +603,12 @@ function createAICompanionUI() {
             const lastAiMessage = aiMessages[aiMessages.length - 1];
             const bubble = lastAiMessage.querySelector('.chat-bubble');
             const text = bubble.textContent || bubble.innerText;
-            
+
             // Only add regenerate button if it's not a system message and has content
             if (text && !text.startsWith('⚠️') && !text.startsWith('🎬') && text.trim() !== '' && !text.includes("What's on your mind")) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'message-actions';
-                
+
                 const regenerateBtn = document.createElement('button');
                 regenerateBtn.className = 'regenerate-btn';
                 regenerateBtn.innerHTML = `
@@ -622,7 +622,7 @@ function createAICompanionUI() {
                 `;
                 regenerateBtn.title = 'Regenerate response';
                 regenerateBtn.onclick = () => regenerateLastResponse(lastAiMessage);
-                
+
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'copy-btn';
                 copyBtn.innerHTML = `
@@ -634,7 +634,7 @@ function createAICompanionUI() {
                 `;
                 copyBtn.title = 'Copy message';
                 copyBtn.onclick = () => copyMessage(lastAiMessage, copyBtn);
-                
+
                 actionsDiv.appendChild(regenerateBtn);
                 actionsDiv.appendChild(copyBtn);
                 lastAiMessage.appendChild(actionsDiv);
@@ -645,14 +645,14 @@ function createAICompanionUI() {
     async function regenerateLastResponse(messageElement) {
         // Find the last user message in chat history
         if (chatHistory.length < 2) return; // Need at least one user message and one AI response
-        
+
         // Get the last user message
         const lastUserMessage = chatHistory[chatHistory.length - 2];
         if (lastUserMessage.role !== 'user') return;
-        
+
         // Remove the last AI response from history
         chatHistory.pop();
-        
+
         // Disable the regenerate button to prevent multiple clicks
         const regenerateBtn = messageElement.querySelector('.regenerate-btn');
         if (regenerateBtn) {
@@ -665,30 +665,30 @@ function createAICompanionUI() {
                 Regenerating...
             `;
         }
-        
+
         // Get transcript
         let transcript = getTranscriptText();
         if (!transcript) {
             appendChatMessage("⚠️ Could not access the transcript for regeneration.", 'ai');
             return;
         }
-        
+
         // Check if AI provider is configured
         const provider = settingsManager.get('aiProvider');
         const isConfigured = checkAIProviderConfiguration(provider);
-        
+
         if (!isConfigured) {
             appendChatMessage("⚠️ AI provider not configured. Please go to Settings and add your API key.", 'ai');
             return;
         }
-        
+
         // Remove the old AI message element
         messageElement.remove();
-        
+
         // Show typing indicator
         const typingIndicator = appendTypingIndicator();
         let fullResponse = '';
-        
+
         try {
             // Get new response from AI
             const responseStream = await aiService.sendMessage(
@@ -696,41 +696,41 @@ function createAICompanionUI() {
                 lastUserMessage.content,
                 chatHistory.slice(-settingsManager.get('maxChatHistory'))
             );
-            
+
             // Remove typing indicator and add new AI response bubble
             typingIndicator.remove();
             const aiBubble = appendChatMessage('', 'ai', true); // Mark as regenerating to avoid adding another regenerate button initially
-            
+
             // Handle streaming response
             for await (const chunk of responseStream) {
                 fullResponse += chunk;
                 aiBubble.innerHTML = parseMarkdown(fullResponse);
-                
+
                 // Only auto-scroll if user hasn't manually scrolled up and auto-scroll is enabled
                 if (settingsManager.get('autoScrollToBottom') && autoScrollEnabled && !isUserScrolling) {
                     chatDisplay.scrollTop = chatDisplay.scrollHeight;
                 }
-                
+
                 // Add typing delay if configured
                 const typingSpeed = settingsManager.get('typingSpeed');
                 if (typingSpeed > 0) {
                     await new Promise(resolve => setTimeout(resolve, typingSpeed));
                 }
             }
-            
 
-            
+
+
             // Add new AI response to history
             chatHistory.push({ role: 'assistant', content: fullResponse });
-            
+
             // Update regenerate button visibility
             updateRegenerateButtonVisibility();
-            
+
         } catch (err) {
             // Remove typing indicator on error
             typingIndicator.remove();
             appendChatMessage(`❌ Error regenerating response: ${err.message}`, 'ai');
-            
+
             // Keep regenerate button available even after error
             updateRegenerateButtonVisibility();
         }
@@ -739,7 +739,7 @@ function createAICompanionUI() {
     function copyMessage(messageElement, copyBtn) {
         const bubble = messageElement.querySelector('.chat-bubble');
         const text = bubble.textContent || bubble.innerText;
-        
+
         // Use the modern clipboard API if available
         if (navigator.clipboard && window.isSecureContext) {
             navigator.clipboard.writeText(text).then(() => {
@@ -763,7 +763,7 @@ function createAICompanionUI() {
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
+
         try {
             const successful = document.execCommand('copy');
             if (successful) {
@@ -774,14 +774,14 @@ function createAICompanionUI() {
         } catch (err) {
             console.error('Fallback: Could not copy text: ', err);
         }
-        
+
         document.body.removeChild(textArea);
     }
 
     function showCopySuccess(copyBtn) {
         const originalHTML = copyBtn.innerHTML;
         const originalClass = copyBtn.className;
-        
+
         copyBtn.className = 'copy-btn copied';
         copyBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -789,7 +789,7 @@ function createAICompanionUI() {
             </svg>
             Copied!
         `;
-        
+
         setTimeout(() => {
             copyBtn.className = originalClass;
             copyBtn.innerHTML = originalHTML;
@@ -828,7 +828,7 @@ function createAICompanionUI() {
             const timestamp = bracketed || unbracketed;
             const parts = timestamp.split(':').map(Number);
             let seconds = 0;
-            
+
             // Validate timestamp format
             if (parts.length === 3) { // HH:MM:SS
                 if (parts[0] >= 0 && parts[1] < 60 && parts[2] < 60) {
@@ -839,7 +839,7 @@ function createAICompanionUI() {
                     seconds = parts[0] * 60 + parts[1];
                 }
             }
-            
+
             // Only create clickable links for valid timestamps
             if (seconds > 0) {
                 return `<a href="#" class="yt-timestamp-link" data-seconds="${seconds}">${timestamp}</a>`;
@@ -859,16 +859,16 @@ function createAICompanionUI() {
 
     function getTimestampContext(timestamp, transcript) {
         if (!transcript || !settingsManager.get('enhancedTimestamps')) return '';
-        
+
         // Find the context around the timestamp in the transcript
         const timestampIndex = transcript.indexOf(timestamp);
         if (timestampIndex === -1) return '';
-        
+
         // Get ~50 characters before and after the timestamp
         const start = Math.max(0, timestampIndex - 50);
         const end = Math.min(transcript.length, timestampIndex + timestamp.length + 100);
         const context = transcript.substring(start, end).trim();
-        
+
         // Clean up the context
         return context.replace(/\s+/g, ' ').substring(0, 150) + (context.length > 150 ? '...' : '');
     }
@@ -945,10 +945,10 @@ function createAICompanionUI() {
         // Add user message to history
         chatHistory.push({ role: 'user', content: message });
         appendChatMessage(message, 'user');
-        
+
         // Hide suggestion buttons after first user message
         hideSuggestedPrompts();
-        
+
         chatInput.value = '';
         chatSendButton.disabled = true;
 
@@ -987,14 +987,14 @@ function createAICompanionUI() {
 
             // Add AI response to history
             chatHistory.push({ role: 'assistant', content: fullResponse });
-            
+
             // Update regenerate button visibility (only show on last AI message)
             updateRegenerateButtonVisibility();
         } catch (err) {
             // Remove typing indicator on error
             typingIndicator.remove();
             appendChatMessage(`❌ Error: ${err.message}`, 'ai');
-            
+
             // Keep regenerate button available even after error
             updateRegenerateButtonVisibility();
         } finally {
@@ -1189,12 +1189,12 @@ observer.observe(document.body, { childList: true, subtree: true });
 handlePageChange();
 
 // --- Mini LLM Popup Feature ---
-function initializeMiniLLMPopup(settingsManager, aiService) {
+function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
     let miniPopup = null;
     let selectedText = '';
     let isPopupVisible = false;
     let hideTimeout = null;
-    
+
     // Clean up any existing popup first
     const existingPopup = document.querySelector('.mini-llm-popup');
     if (existingPopup) {
@@ -1244,6 +1244,47 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
             font-size: 12px;
             font-weight: 500;
             color: #3ea6ff;
+        }
+        .mini-llm-popup-context-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            margin: 4px 0;
+        }
+        .mini-llm-popup-context-label {
+            font-size: 12px;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        .context-toggle-switch {
+            position: relative;
+            width: 32px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(62, 166, 255, 0.3);
+        }
+        .context-toggle-switch.enabled {
+            background: rgba(62, 166, 255, 0.3);
+            border-color: rgba(62, 166, 255, 0.6);
+        }
+        .context-toggle-slider {
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 12px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .context-toggle-switch.enabled .context-toggle-slider {
+            transform: translateX(16px);
+            background: #3ea6ff;
         }
         .mini-llm-popup-buttons {
             display: flex;
@@ -1361,7 +1402,7 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
     function createPopup() {
         const popup = document.createElement('div');
         popup.className = 'mini-llm-popup';
-        const popupTitle = 'Quick AI';
+        const popupTitle = 'Mini Assistant';
         popup.innerHTML = `
             <div class="mini-llm-popup-header">
                 <img src="${chrome.runtime.getURL('assets/chep-logo.png')}" alt="Chep" class="mini-llm-popup-logo">
@@ -1372,6 +1413,12 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
                 <input type="text" class="mini-llm-popup-input" placeholder="Ask about this text...">
                 <button class="mini-llm-popup-send">Ask</button>
             </div>
+            <div class="mini-llm-popup-context-toggle">
+                <span class="mini-llm-popup-context-label">Use video context</span>
+                <div class="context-toggle-switch enabled" data-context-enabled="true">
+                    <div class="context-toggle-slider"></div>
+                </div>
+            </div>
             <div class="mini-llm-popup-divider"></div>
             <div class="mini-llm-popup-buttons">
                 <button class="mini-llm-popup-btn" data-action="explain">Explain this</button>
@@ -1381,12 +1428,12 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
             </div>
         `;
         document.body.appendChild(popup);
-        
+
         // Add event listeners to prevent unwanted hiding
         popup.addEventListener('wheel', (e) => {
             e.stopPropagation();
         });
-        
+
         // Clear hide timeout when mouse enters popup
         popup.addEventListener('mouseenter', () => {
             if (hideTimeout) {
@@ -1394,7 +1441,7 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
                 hideTimeout = null;
             }
         });
-        
+
         // Prevent hiding when focusing input
         const input = popup.querySelector('.mini-llm-popup-input');
         if (input) {
@@ -1404,7 +1451,7 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
                     hideTimeout = null;
                 }
             });
-            
+
             input.addEventListener('blur', () => {
                 // Small delay before potentially hiding
                 setTimeout(() => {
@@ -1414,7 +1461,7 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
                 }, 50);
             });
         }
-        
+
         return popup;
     }
 
@@ -1422,25 +1469,25 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
     function positionPopup(popup, selection) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        
+
         // Calculate position
         let left = rect.left + (rect.width / 2) - 150; // Center horizontally
         let top = rect.bottom + 10; // Position below selection
-        
+
         // Adjust if popup would go off-screen
         const popupRect = popup.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
-        
+
         // Horizontal adjustment
         if (left < 10) left = 10;
         if (left + 300 > viewportWidth - 10) left = viewportWidth - 310;
-        
+
         // Vertical adjustment - show above if not enough space below
         if (top + popupRect.height > viewportHeight - 10) {
             top = rect.top - popupRect.height - 10;
         }
-        
+
         popup.style.left = `${left}px`;
         popup.style.top = `${top}px`;
     }
@@ -1449,33 +1496,33 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
     function showPopup(selection) {
         selectedText = selection.toString().trim();
         if (!selectedText || selectedText.length < 3) return;
-        
+
         // Limit selected text length for display
-        const displayText = selectedText.length > 100 ? 
+        const displayText = selectedText.length > 100 ?
             selectedText.substring(0, 100) + '...' : selectedText;
-        
+
         if (!miniPopup) {
             miniPopup = createPopup();
         }
-        
+
         // Update selected text display
         const textDisplay = miniPopup.querySelector('.mini-llm-popup-selected-text');
         textDisplay.textContent = `"${displayText}"`;
-        
+
         // Position and show popup
         positionPopup(miniPopup, selection);
-        
+
         // Clear any existing timeout
         if (hideTimeout) {
             clearTimeout(hideTimeout);
             hideTimeout = null;
         }
-        
+
         // Show popup with animation
         setTimeout(() => {
             miniPopup.classList.add('visible');
             isPopupVisible = true;
-            
+
             // Focus the input field for immediate typing
             const input = miniPopup.querySelector('.mini-llm-popup-input');
             if (input) {
@@ -1489,7 +1536,7 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
         if (miniPopup && isPopupVisible) {
             miniPopup.classList.remove('visible');
             isPopupVisible = false;
-            
+
             // Remove response if any
             const responseDiv = miniPopup.querySelector('.mini-llm-popup-response');
             if (responseDiv) {
@@ -1501,19 +1548,23 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
     // Handle AI request
     async function handleAIRequest(action, customPrompt = null) {
         if (!selectedText) return;
-        
+
         // Check if AI is configured
         const provider = settingsManager.get('aiProvider');
         const isConfigured = checkAIProviderConfiguration(provider);
-        
+
         if (!isConfigured) {
             showPopupResponse("⚠️ AI provider not configured. Please configure your API key in the YouTube AI Companion settings.");
             return;
         }
-        
+
         // Show loading state
         showPopupLoading();
-        
+
+        // Check if context is enabled
+        const contextToggle = miniPopup.querySelector('.context-toggle-switch');
+        const isContextEnabled = contextToggle.dataset.contextEnabled === 'true';
+
         // Build prompt based on action or use custom prompt
         let prompt = '';
         if (customPrompt) {
@@ -1536,26 +1587,41 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
                     prompt = `Please help me understand this text: "${selectedText}"`;
             }
         }
-        
+
         try {
-            // Use a simple context for the mini popup (no video transcript)
-            const simpleTranscript = `Selected text from webpage: "${selectedText}"`;
-            const responseStream = await aiService.sendMessage(simpleTranscript, prompt, []);
+            let contextText = '';
             
+            if (isContextEnabled) {
+                // Get video transcript if available, otherwise use simple context
+                let transcript = '';
+                if (window.location.href.includes('youtube.com/watch')) {
+                    transcript = getTranscriptText();
+                }
+
+                contextText = transcript ?
+                    `Video transcript: ${transcript}\n\nSelected text from page: "${selectedText}"` :
+                    `Selected text from webpage: "${selectedText}"`;
+            } else {
+                // Context disabled - only use the selected text
+                contextText = `Selected text: "${selectedText}"`;
+            }
+
+            const responseStream = await aiService.sendMessage(contextText, prompt, [], true); // true = mini assistant mode
+
             let fullResponse = '';
             const responseDiv = showPopupResponse('');
-            
+
             // Handle streaming response
             for await (const chunk of responseStream) {
                 fullResponse += chunk;
                 responseDiv.textContent = fullResponse;
-                
+
                 // Auto-scroll response if needed
                 if (responseDiv.scrollHeight > responseDiv.clientHeight) {
                     responseDiv.scrollTop = responseDiv.scrollHeight;
                 }
             }
-            
+
         } catch (error) {
             showPopupResponse(`❌ Error: ${error.message}`);
         }
@@ -1565,13 +1631,13 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
     function showPopupLoading() {
         const buttonsDiv = miniPopup.querySelector('.mini-llm-popup-buttons');
         const inputContainer = miniPopup.querySelector('.mini-llm-popup-input-container');
-        
+
         // Disable input and send button
         const input = inputContainer.querySelector('.mini-llm-popup-input');
         const sendBtn = inputContainer.querySelector('.mini-llm-popup-send');
         input.disabled = true;
         sendBtn.disabled = true;
-        
+
         buttonsDiv.innerHTML = `
             <div class="mini-llm-popup-loading">
                 <div class="mini-llm-popup-spinner"></div>
@@ -1585,20 +1651,20 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
         // Remove loading state and restore buttons
         const buttonsDiv = miniPopup.querySelector('.mini-llm-popup-buttons');
         const inputContainer = miniPopup.querySelector('.mini-llm-popup-input-container');
-        
+
         // Re-enable input and send button
         const input = inputContainer.querySelector('.mini-llm-popup-input');
         const sendBtn = inputContainer.querySelector('.mini-llm-popup-send');
         input.disabled = false;
         sendBtn.disabled = false;
-        
+
         buttonsDiv.innerHTML = `
             <button class="mini-llm-popup-btn" data-action="explain">Explain this</button>
             <button class="mini-llm-popup-btn" data-action="summarize">Summarize</button>
             <button class="mini-llm-popup-btn" data-action="translate">Translate</button>
             <button class="mini-llm-popup-btn" data-action="define">Define key terms</button>
         `;
-        
+
         // Add or update response div
         let responseDiv = miniPopup.querySelector('.mini-llm-popup-response');
         if (!responseDiv) {
@@ -1606,7 +1672,7 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
             responseDiv.className = 'mini-llm-popup-response';
             miniPopup.appendChild(responseDiv);
         }
-        
+
         responseDiv.textContent = response;
         return responseDiv;
     }
@@ -1639,13 +1705,26 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
         }, 10);
     });
 
-    // Hide popup when clicking elsewhere
+    // Hide popup when clicking elsewhere (more persistent)
     document.addEventListener('mousedown', (e) => {
         if (miniPopup && !miniPopup.contains(e.target) && isPopupVisible) {
-            // Don't hide immediately if user might be making a new selection
-            const selection = window.getSelection();
-            if (selection.isCollapsed) {
-                hideTimeout = setTimeout(hidePopup, 150);
+            // Only hide if clicking far from the popup
+            const popupRect = miniPopup.getBoundingClientRect();
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+
+            // Add buffer zone around popup (30px for more tolerance)
+            const buffer = 30;
+            const isNearPopup = clickX >= popupRect.left - buffer &&
+                clickX <= popupRect.right + buffer &&
+                clickY >= popupRect.top - buffer &&
+                clickY <= popupRect.bottom + buffer;
+
+            if (!isNearPopup) {
+                const selection = window.getSelection();
+                if (selection.isCollapsed) {
+                    hideTimeout = setTimeout(hidePopup, 500); // Longer delay
+                }
             }
         }
     });
@@ -1657,34 +1736,72 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
         if (e.target.classList.contains('mini-llm-popup-btn')) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             // Clear hide timeout if set
             if (hideTimeout) {
                 clearTimeout(hideTimeout);
                 hideTimeout = null;
             }
-            
+
             const action = e.target.dataset.action;
             handleAIRequest(action);
         }
-        
+
         if (e.target.classList.contains('mini-llm-popup-send')) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             // Clear hide timeout if set
             if (hideTimeout) {
                 clearTimeout(hideTimeout);
                 hideTimeout = null;
             }
-            
+
             const input = miniPopup.querySelector('.mini-llm-popup-input');
             const customPrompt = input.value.trim();
-            
+
             if (customPrompt) {
                 handleAIRequest(null, customPrompt);
                 input.value = ''; // Clear input after sending
             }
+        }
+
+        // Handle context toggle
+        if (e.target.classList.contains('context-toggle-switch') || e.target.closest('.context-toggle-switch')) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Clear hide timeout if set
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+
+            const toggleSwitch = e.target.classList.contains('context-toggle-switch') ? 
+                e.target : e.target.closest('.context-toggle-switch');
+            
+            const isCurrentlyEnabled = toggleSwitch.dataset.contextEnabled === 'true';
+            const newState = !isCurrentlyEnabled;
+            
+            // Update toggle state
+            toggleSwitch.dataset.contextEnabled = newState.toString();
+            
+            if (newState) {
+                toggleSwitch.classList.add('enabled');
+            } else {
+                toggleSwitch.classList.remove('enabled');
+            }
+
+            // Optional: Show brief feedback about the toggle state
+            const label = miniPopup.querySelector('.mini-llm-popup-context-label');
+            const originalText = label.textContent;
+            label.textContent = newState ? 'Context ON' : 'Context OFF';
+            label.style.color = newState ? '#4ade80' : '#f87171';
+            
+            setTimeout(() => {
+                label.textContent = originalText;
+                label.style.color = '#aaaaaa';
+            }, 1000);
         }
     });
 
@@ -1695,7 +1812,7 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
             const sendBtn = miniPopup.querySelector('.mini-llm-popup-send');
             sendBtn.click();
         }
-        
+
         if (e.key === 'Escape' && isPopupVisible) {
             hidePopup();
         }
@@ -1709,8 +1826,8 @@ function initializeMiniLLMPopup(settingsManager, aiService) {
             if (miniPopup && (miniPopup.contains(document.activeElement) || miniPopup.matches(':hover'))) {
                 return;
             }
-            // Delay hiding to prevent flicker when user is still selecting
-            hideTimeout = setTimeout(hidePopup, 300);
+            // Longer delay to prevent accidental hiding
+            hideTimeout = setTimeout(hidePopup, 1000);
         }
     });
 

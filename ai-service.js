@@ -33,7 +33,7 @@ class AIService {
                 }
                 return false;
             });
-        
+
         // Remove duplicates and sort chronologically
         return [...new Set(timestamps)].sort((a, b) => {
             const aSeconds = this.timestampToSeconds(a);
@@ -54,7 +54,7 @@ class AIService {
 
     buildSystemPrompt(transcript, isMiniAssistant = false) {
         const customPrompt = this.settingsManager.get('customPrompt');
-        
+
         if (isMiniAssistant) {
             // Mini assistant mode - no timestamps, more concise
             let systemPrompt = `You are a helpful AI assistant.
@@ -72,11 +72,11 @@ Your job is to:
             systemPrompt += `\n\nContext:\n---\n${transcript}\n---`;
             return systemPrompt;
         }
-        
+
         // Regular mode with timestamps
         const availableTimestamps = this.extractTimestamps(transcript);
         const hasTimestamps = availableTimestamps.length > 0;
-        
+
         let systemPrompt = `You are a helpful YouTube video assistant.
 
 Your inputs are:
@@ -92,7 +92,7 @@ Your job is to:
             systemPrompt += `
 - **Cite evidence with timestamps** by quoting relevant text and including the exact timestamp from the transcript. Format timestamps as clickable links like this: [0:45] or [1:23:45].
 - **Only use timestamps that actually exist in the transcript** - available timestamps include: ${availableTimestamps.slice(0, 10).join(', ')}${availableTimestamps.length > 10 ? '...' : ''}`;
-            
+
             if (enhancedTimestamps) {
                 systemPrompt += `
 - **Provide context for timestamps** by briefly describing what happens at that moment in the video.
@@ -339,7 +339,7 @@ ${transcript}
                 const textRegex = /"text"\s*:\s*"((?:\\.|[^"\\])*)"/g;
                 let combinedText = '';
                 let match;
-                
+
                 while ((match = textRegex.exec(buffer)) !== null) {
                     try {
                         // The matched group is a JSON-escaped string. We need to parse it to get the actual text.
