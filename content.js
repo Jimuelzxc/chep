@@ -409,6 +409,31 @@ function createAICompanionUI() {
     const settingsManager = new window.SettingsManager();
     const aiService = new window.AIService(settingsManager);
 
+    // --- Initialize Mini LLM Popup ---
+    let miniPopupInitialized = false;
+    
+    function initializeMiniPopupIfEnabled() {
+        if (settingsManager.get('enableMiniPopup') && !miniPopupInitialized) {
+            initializeMiniLLMPopup(settingsManager, aiService);
+            miniPopupInitialized = true;
+        } else if (!settingsManager.get('enableMiniPopup') && miniPopupInitialized) {
+            // Remove popup if it exists
+            const existingPopup = document.querySelector('.mini-llm-popup');
+            if (existingPopup) {
+                existingPopup.remove();
+            }
+            miniPopupInitialized = false;
+        }
+    }
+    
+    // Initialize on load
+    initializeMiniPopupIfEnabled();
+    
+    // Listen for settings changes
+    window.addEventListener('ai-settings-changed', () => {
+        initializeMiniPopupIfEnabled();
+    });
+
     // --- Get Element References ---
     const header = container.querySelector('.ai-header');
     const headerLeft = container.querySelector('.ai-header-left');
@@ -1162,3 +1187,532 @@ observer.observe(document.body, { childList: true, subtree: true });
 
 // Initial check in case the script loads on a video page directly.
 handlePageChange();
+
+// --- Mini LLM Popup Feature ---
+function initializeMiniLLMPopup(settingsManager, aiService) {
+    let miniPopup = null;
+    let selectedText = '';
+    let isPopupVisible = false;
+    let hideTimeout = null;
+    
+    // Clean up any existing popup first
+    const existingPopup = document.querySelector('.mini-llm-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
+    // Create popup styles
+    const popupStyle = document.createElement('style');
+    popupStyle.textContent = `
+        .mini-llm-popup {
+            position: absolute;
+            background: #1a1a1a;
+            border: 1px solid #3ea6ff;
+            border-radius: 8px;
+            padding: 8px;
+            z-index: 10000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(62, 166, 255, 0.2);
+            font-family: 'Roboto', Arial, sans-serif;
+            font-size: 13px;
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+        .mini-llm-popup.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .mini-llm-popup-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(62, 166, 255, 0.2);
+        }
+        .mini-llm-popup-logo {
+            width: 16px;
+            height: 16px;
+            opacity: 0.9;
+        }
+        .mini-llm-popup-title {
+            font-size: 12px;
+            font-weight: 500;
+            color: #3ea6ff;
+        }
+        .mini-llm-popup-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .mini-llm-popup-input-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .mini-llm-popup-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(62, 166, 255, 0.3);
+            color: #ffffff;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .mini-llm-popup-input:focus {
+            border-color: #3ea6ff;
+            box-shadow: 0 0 0 1px rgba(62, 166, 255, 0.2);
+        }
+        .mini-llm-popup-input::placeholder {
+            color: #666;
+        }
+        .mini-llm-popup-send {
+            background: rgba(62, 166, 255, 0.2);
+            border: 1px solid rgba(62, 166, 255, 0.4);
+            color: #ffffff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .mini-llm-popup-send:hover {
+            background: rgba(62, 166, 255, 0.3);
+            border-color: rgba(62, 166, 255, 0.6);
+        }
+        .mini-llm-popup-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .mini-llm-popup-divider {
+            height: 1px;
+            background: rgba(62, 166, 255, 0.2);
+            margin: 8px 0;
+        }
+        .mini-llm-popup-btn {
+            background: rgba(62, 166, 255, 0.1);
+            border: 1px solid rgba(62, 166, 255, 0.3);
+            color: #ffffff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+        .mini-llm-popup-btn:hover {
+            background: rgba(62, 166, 255, 0.2);
+            border-color: rgba(62, 166, 255, 0.5);
+            transform: translateY(-1px);
+        }
+        .mini-llm-popup-btn:active {
+            transform: translateY(0);
+        }
+        .mini-llm-popup-selected-text {
+            background: rgba(62, 166, 255, 0.1);
+            border: 1px solid rgba(62, 166, 255, 0.2);
+            border-radius: 4px;
+            padding: 6px;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: #aaaaaa;
+            max-height: 60px;
+            overflow-y: auto;
+            word-break: break-word;
+        }
+        .mini-llm-popup-response {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(62, 166, 255, 0.2);
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .mini-llm-popup-loading {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #aaaaaa;
+            font-size: 11px;
+        }
+        .mini-llm-popup-spinner {
+            width: 12px;
+            height: 12px;
+            border: 1px solid rgba(62, 166, 255, 0.3);
+            border-top: 1px solid #3ea6ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+    `;
+    document.head.appendChild(popupStyle);
+
+    // Create popup element
+    function createPopup() {
+        const popup = document.createElement('div');
+        popup.className = 'mini-llm-popup';
+        const popupTitle = 'Quick AI';
+        popup.innerHTML = `
+            <div class="mini-llm-popup-header">
+                <img src="${chrome.runtime.getURL('assets/chep-logo.png')}" alt="Chep" class="mini-llm-popup-logo">
+                <span class="mini-llm-popup-title">${popupTitle}</span>
+            </div>
+            <div class="mini-llm-popup-selected-text"></div>
+            <div class="mini-llm-popup-input-container">
+                <input type="text" class="mini-llm-popup-input" placeholder="Ask about this text...">
+                <button class="mini-llm-popup-send">Ask</button>
+            </div>
+            <div class="mini-llm-popup-divider"></div>
+            <div class="mini-llm-popup-buttons">
+                <button class="mini-llm-popup-btn" data-action="explain">Explain this</button>
+                <button class="mini-llm-popup-btn" data-action="summarize">Summarize</button>
+                <button class="mini-llm-popup-btn" data-action="translate">Translate</button>
+                <button class="mini-llm-popup-btn" data-action="define">Define key terms</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+        
+        // Add event listeners to prevent unwanted hiding
+        popup.addEventListener('wheel', (e) => {
+            e.stopPropagation();
+        });
+        
+        // Clear hide timeout when mouse enters popup
+        popup.addEventListener('mouseenter', () => {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+        });
+        
+        // Prevent hiding when focusing input
+        const input = popup.querySelector('.mini-llm-popup-input');
+        if (input) {
+            input.addEventListener('focus', () => {
+                if (hideTimeout) {
+                    clearTimeout(hideTimeout);
+                    hideTimeout = null;
+                }
+            });
+            
+            input.addEventListener('blur', () => {
+                // Small delay before potentially hiding
+                setTimeout(() => {
+                    if (!popup.matches(':hover') && !popup.contains(document.activeElement)) {
+                        hideTimeout = setTimeout(hidePopup, 200);
+                    }
+                }, 50);
+            });
+        }
+        
+        return popup;
+    }
+
+    // Position popup near selection
+    function positionPopup(popup, selection) {
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        
+        // Calculate position
+        let left = rect.left + (rect.width / 2) - 150; // Center horizontally
+        let top = rect.bottom + 10; // Position below selection
+        
+        // Adjust if popup would go off-screen
+        const popupRect = popup.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Horizontal adjustment
+        if (left < 10) left = 10;
+        if (left + 300 > viewportWidth - 10) left = viewportWidth - 310;
+        
+        // Vertical adjustment - show above if not enough space below
+        if (top + popupRect.height > viewportHeight - 10) {
+            top = rect.top - popupRect.height - 10;
+        }
+        
+        popup.style.left = `${left}px`;
+        popup.style.top = `${top}px`;
+    }
+
+    // Show popup
+    function showPopup(selection) {
+        selectedText = selection.toString().trim();
+        if (!selectedText || selectedText.length < 3) return;
+        
+        // Limit selected text length for display
+        const displayText = selectedText.length > 100 ? 
+            selectedText.substring(0, 100) + '...' : selectedText;
+        
+        if (!miniPopup) {
+            miniPopup = createPopup();
+        }
+        
+        // Update selected text display
+        const textDisplay = miniPopup.querySelector('.mini-llm-popup-selected-text');
+        textDisplay.textContent = `"${displayText}"`;
+        
+        // Position and show popup
+        positionPopup(miniPopup, selection);
+        
+        // Clear any existing timeout
+        if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+        }
+        
+        // Show popup with animation
+        setTimeout(() => {
+            miniPopup.classList.add('visible');
+            isPopupVisible = true;
+            
+            // Focus the input field for immediate typing
+            const input = miniPopup.querySelector('.mini-llm-popup-input');
+            if (input) {
+                input.focus();
+            }
+        }, 10);
+    }
+
+    // Hide popup
+    function hidePopup() {
+        if (miniPopup && isPopupVisible) {
+            miniPopup.classList.remove('visible');
+            isPopupVisible = false;
+            
+            // Remove response if any
+            const responseDiv = miniPopup.querySelector('.mini-llm-popup-response');
+            if (responseDiv) {
+                responseDiv.remove();
+            }
+        }
+    }
+
+    // Handle AI request
+    async function handleAIRequest(action, customPrompt = null) {
+        if (!selectedText) return;
+        
+        // Check if AI is configured
+        const provider = settingsManager.get('aiProvider');
+        const isConfigured = checkAIProviderConfiguration(provider);
+        
+        if (!isConfigured) {
+            showPopupResponse("⚠️ AI provider not configured. Please configure your API key in the YouTube AI Companion settings.");
+            return;
+        }
+        
+        // Show loading state
+        showPopupLoading();
+        
+        // Build prompt based on action or use custom prompt
+        let prompt = '';
+        if (customPrompt) {
+            prompt = `${customPrompt}\n\nSelected text: "${selectedText}"`;
+        } else {
+            switch (action) {
+                case 'explain':
+                    prompt = `Please explain this text in simple terms: "${selectedText}"`;
+                    break;
+                case 'summarize':
+                    prompt = `Please provide a concise summary of this text: "${selectedText}"`;
+                    break;
+                case 'translate':
+                    prompt = `Please translate this text to English (if it's not English) or provide the meaning: "${selectedText}"`;
+                    break;
+                case 'define':
+                    prompt = `Please define the key terms and concepts in this text: "${selectedText}"`;
+                    break;
+                default:
+                    prompt = `Please help me understand this text: "${selectedText}"`;
+            }
+        }
+        
+        try {
+            // Use a simple context for the mini popup (no video transcript)
+            const simpleTranscript = `Selected text from webpage: "${selectedText}"`;
+            const responseStream = await aiService.sendMessage(simpleTranscript, prompt, []);
+            
+            let fullResponse = '';
+            const responseDiv = showPopupResponse('');
+            
+            // Handle streaming response
+            for await (const chunk of responseStream) {
+                fullResponse += chunk;
+                responseDiv.textContent = fullResponse;
+                
+                // Auto-scroll response if needed
+                if (responseDiv.scrollHeight > responseDiv.clientHeight) {
+                    responseDiv.scrollTop = responseDiv.scrollHeight;
+                }
+            }
+            
+        } catch (error) {
+            showPopupResponse(`❌ Error: ${error.message}`);
+        }
+    }
+
+    // Show loading state in popup
+    function showPopupLoading() {
+        const buttonsDiv = miniPopup.querySelector('.mini-llm-popup-buttons');
+        const inputContainer = miniPopup.querySelector('.mini-llm-popup-input-container');
+        
+        // Disable input and send button
+        const input = inputContainer.querySelector('.mini-llm-popup-input');
+        const sendBtn = inputContainer.querySelector('.mini-llm-popup-send');
+        input.disabled = true;
+        sendBtn.disabled = true;
+        
+        buttonsDiv.innerHTML = `
+            <div class="mini-llm-popup-loading">
+                <div class="mini-llm-popup-spinner"></div>
+                <span>Thinking...</span>
+            </div>
+        `;
+    }
+
+    // Show response in popup
+    function showPopupResponse(response) {
+        // Remove loading state and restore buttons
+        const buttonsDiv = miniPopup.querySelector('.mini-llm-popup-buttons');
+        const inputContainer = miniPopup.querySelector('.mini-llm-popup-input-container');
+        
+        // Re-enable input and send button
+        const input = inputContainer.querySelector('.mini-llm-popup-input');
+        const sendBtn = inputContainer.querySelector('.mini-llm-popup-send');
+        input.disabled = false;
+        sendBtn.disabled = false;
+        
+        buttonsDiv.innerHTML = `
+            <button class="mini-llm-popup-btn" data-action="explain">Explain this</button>
+            <button class="mini-llm-popup-btn" data-action="summarize">Summarize</button>
+            <button class="mini-llm-popup-btn" data-action="translate">Translate</button>
+            <button class="mini-llm-popup-btn" data-action="define">Define key terms</button>
+        `;
+        
+        // Add or update response div
+        let responseDiv = miniPopup.querySelector('.mini-llm-popup-response');
+        if (!responseDiv) {
+            responseDiv = document.createElement('div');
+            responseDiv.className = 'mini-llm-popup-response';
+            miniPopup.appendChild(responseDiv);
+        }
+        
+        responseDiv.textContent = response;
+        return responseDiv;
+    }
+
+    // Check if AI provider is configured (reuse from main extension)
+    function checkAIProviderConfiguration(provider) {
+        switch (provider) {
+            case 'openai':
+                return !!settingsManager.get('openaiApiKey');
+            case 'gemini':
+                return !!settingsManager.get('geminiApiKey');
+            case 'openrouter':
+                return !!settingsManager.get('openrouterApiKey');
+            default:
+                return false;
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('mouseup', (e) => {
+        // Small delay to ensure selection is complete
+        setTimeout(() => {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0 && !selection.isCollapsed) {
+                // Check if selection is not inside the popup itself
+                if (!miniPopup || !miniPopup.contains(e.target)) {
+                    showPopup(selection);
+                }
+            }
+        }, 10);
+    });
+
+    // Hide popup when clicking elsewhere
+    document.addEventListener('mousedown', (e) => {
+        if (miniPopup && !miniPopup.contains(e.target) && isPopupVisible) {
+            // Don't hide immediately if user might be making a new selection
+            const selection = window.getSelection();
+            if (selection.isCollapsed) {
+                hideTimeout = setTimeout(hidePopup, 150);
+            }
+        }
+    });
+
+
+
+    // Handle button clicks and input
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('mini-llm-popup-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Clear hide timeout if set
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+            
+            const action = e.target.dataset.action;
+            handleAIRequest(action);
+        }
+        
+        if (e.target.classList.contains('mini-llm-popup-send')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Clear hide timeout if set
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+            
+            const input = miniPopup.querySelector('.mini-llm-popup-input');
+            const customPrompt = input.value.trim();
+            
+            if (customPrompt) {
+                handleAIRequest(null, customPrompt);
+                input.value = ''; // Clear input after sending
+            }
+        }
+    });
+
+    // Handle Enter key in input field
+    document.addEventListener('keydown', (e) => {
+        if (e.target.classList.contains('mini-llm-popup-input') && e.key === 'Enter') {
+            e.preventDefault();
+            const sendBtn = miniPopup.querySelector('.mini-llm-popup-send');
+            sendBtn.click();
+        }
+        
+        if (e.key === 'Escape' && isPopupVisible) {
+            hidePopup();
+        }
+    });
+
+    // Hide popup when selection changes (but not when interacting with popup)
+    document.addEventListener('selectionchange', () => {
+        const selection = window.getSelection();
+        if (selection.isCollapsed && isPopupVisible) {
+            // Don't hide if user is interacting with the popup
+            if (miniPopup && (miniPopup.contains(document.activeElement) || miniPopup.matches(':hover'))) {
+                return;
+            }
+            // Delay hiding to prevent flicker when user is still selecting
+            hideTimeout = setTimeout(hidePopup, 300);
+        }
+    });
+
+
+}

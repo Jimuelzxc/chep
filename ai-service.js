@@ -4,16 +4,16 @@ class AIService {
         this.settingsManager = settingsManager;
     }
 
-    async sendMessage(transcript, message, history = []) {
+    async sendMessage(transcript, message, history = [], isMiniAssistant = false) {
         const provider = this.settingsManager.get('aiProvider');
 
         switch (provider) {
             case 'openai':
-                return this.sendOpenAIMessage(transcript, message, history);
+                return this.sendOpenAIMessage(transcript, message, history, isMiniAssistant);
             case 'gemini':
-                return this.sendGeminiMessage(transcript, message, history);
+                return this.sendGeminiMessage(transcript, message, history, isMiniAssistant);
             case 'openrouter':
-                return this.sendOpenRouterMessage(transcript, message, history);
+                return this.sendOpenRouterMessage(transcript, message, history, isMiniAssistant);
             default:
                 throw new Error(`Unsupported AI provider: ${provider}`);
         }
@@ -52,10 +52,28 @@ class AIService {
         return 0;
     }
 
-    buildSystemPrompt(transcript) {
+    buildSystemPrompt(transcript, isMiniAssistant = false) {
         const customPrompt = this.settingsManager.get('customPrompt');
         
-        // Extract and validate timestamps from transcript
+        if (isMiniAssistant) {
+            // Mini assistant mode - no timestamps, more concise
+            let systemPrompt = `You are a helpful AI assistant.
+
+Your job is to:
+- **Answer questions concisely and accurately** using the provided context and general knowledge.
+- **Be brief and to the point** - this is a quick assistance interface.
+- **Do not include timestamps or time references** in your responses.
+- **Focus on direct, helpful answers** without lengthy explanations unless specifically requested.`;
+
+            if (customPrompt && customPrompt.trim()) {
+                systemPrompt += `\n\nAdditional behavior instructions: ${customPrompt.trim()}`;
+            }
+
+            systemPrompt += `\n\nContext:\n---\n${transcript}\n---`;
+            return systemPrompt;
+        }
+        
+        // Regular mode with timestamps
         const availableTimestamps = this.extractTimestamps(transcript);
         const hasTimestamps = availableTimestamps.length > 0;
         
@@ -103,7 +121,7 @@ ${transcript}
         return systemPrompt;
     }
 
-    async sendOpenAIMessage(transcript, message, history) {
+    async sendOpenAIMessage(transcript, message, history, isMiniAssistant = false) {
         const apiKey = this.settingsManager.get('openaiApiKey');
         const model = this.settingsManager.get('openaiModel');
 
@@ -112,7 +130,7 @@ ${transcript}
         }
 
         const messages = [
-            { role: 'system', content: this.buildSystemPrompt(transcript) }
+            { role: 'system', content: this.buildSystemPrompt(transcript, isMiniAssistant) }
         ];
 
         // Add conversation history
@@ -148,7 +166,7 @@ ${transcript}
         return this.handleStreamResponse(response);
     }
 
-    async sendGeminiMessage(transcript, message, history) {
+    async sendGeminiMessage(transcript, message, history, isMiniAssistant = false) {
         const apiKey = this.settingsManager.get('geminiApiKey');
         const model = this.settingsManager.get('geminiModel');
 
@@ -157,7 +175,7 @@ ${transcript}
         }
 
         // Build conversation context for Gemini
-        const systemPrompt = this.buildSystemPrompt(transcript);
+        const systemPrompt = this.buildSystemPrompt(transcript, isMiniAssistant);
 
         // Build contents array for Gemini format
         const contents = [];
@@ -225,7 +243,7 @@ ${transcript}
         return this.handleGeminiStreamResponse(response);
     }
 
-    async sendOpenRouterMessage(transcript, message, history) {
+    async sendOpenRouterMessage(transcript, message, history, isMiniAssistant = false) {
         const apiKey = this.settingsManager.get('openrouterApiKey');
         const model = this.settingsManager.get('openrouterModel');
 
@@ -234,7 +252,7 @@ ${transcript}
         }
 
         const messages = [
-            { role: 'system', content: this.buildSystemPrompt(transcript) }
+            { role: 'system', content: this.buildSystemPrompt(transcript, isMiniAssistant) }
         ];
 
         // Add conversation history

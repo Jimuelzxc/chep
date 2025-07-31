@@ -31,6 +31,7 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ✅ **Scrolling Disabled During Streaming:** Users cannot scroll up in the chat interface while the AI's response is being streamed. Scrolling should be possible even when the response is not yet complete. (Fixed by implementing scroll detection that disables auto-scroll when user manually scrolls up and re-enables it when they return to bottom)
 - ✅ **System Prompt Too Restrictive:** The AI refuses to answer general knowledge questions about topics mentioned in the video because the system prompt forces it to only use transcript information. For example, if a video is about "String Theory" and user asks "What is string theory?", the AI says it's not in the transcript instead of providing helpful general knowledge while also referencing what the video specifically covers.
 - ✅ **Suggestion Buttons Not Hidden After First User Request:** The suggested prompt buttons remain visible even after the user has started chatting. The suggestion buttons should be hidden once the chat history is not empty or after the user makes their first request to avoid interface clutter. (Fixed by adding hideSuggestedPrompts() call in handleChat function after user message is processed)
+- ✅ **Mini LLM Popup Auto-Hides When Interacting:** The mini LLM popup disappears automatically when users try to interact with the input field or buttons due to selection change events. Fixed by improving event handling to prevent hiding when user is actively interacting with the popup.
 
 
 
@@ -54,7 +55,7 @@ This file tracks bugs, feature requests, and general notes for future reference 
 - ✅ **Custom Prompts - User-defined AI Behavior:** Add a textarea field in the AI Configuration section that allows users to define custom system prompts or behavior instructions for the AI. This would let users specify how they want the AI to respond (e.g., "respond in simple English," "be more concise," "explain like I'm 5," etc.). The custom prompt would be prepended to all AI requests to modify the AI's response style and behavior according to user preferences.
 
 - ✅ **Add Regenerate Button:** Implement a button that allows users to regenerate the AI's last response. This is useful when the response is erroneous or unsatisfactory, saving the user from re-typing their prompt. (Implemented with hover-to-show regenerate button on AI messages that maintains chat history and streams new responses)
-- ❌ **Mini LLM Popup on Text Selection:** When a user selects text on a page, a small popup should appear next to the selection. This popup will act as a mini-LLM interface, allowing the user to quickly ask questions or get information about the selected keyword or phrase.
+- ✅ **Mini LLM Popup on Text Selection:** When a user selects text on a page, a small popup should appear next to the selection. This popup will act as a mini-LLM interface, allowing the user to quickly ask questions or get information about the selected keyword or phrase. (Implemented with contextual action buttons: Explain, Summarize, Translate, and Define key terms. Added settings to enable/disable and customize popup title)
 
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*

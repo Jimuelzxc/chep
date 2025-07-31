@@ -24,6 +24,8 @@ class SettingsManager {
             openrouterApiKey: '',
             openrouterModel: 'google/gemini-flash-1.5',
             customPrompt: '',
+            // Mini Popup Settings
+            enableMiniPopup: true,
         };
         this.settings = { ...this.defaultSettings };
         this.loadSettings();
@@ -251,6 +253,10 @@ class SettingsManager {
                             <div class="setting-item">
                                 <label for="sound-notifications-toggle">Sound Notifications:</label>
                                 <input type="checkbox" id="sound-notifications-toggle" ${this.settings.soundNotifications ? 'checked' : ''}>
+                            </div>
+                            <div class="setting-item">
+                                <label for="mini-popup-toggle">Enable Mini Assistant:</label>
+                                <input type="checkbox" id="mini-popup-toggle" ${this.settings.enableMiniPopup ? 'checked' : ''}>
                             </div>
                         </div>
                     </div>
@@ -537,6 +543,7 @@ class SettingsManager {
         document.getElementById('auto-scroll-toggle').checked = this.settings.autoScrollToBottom;
         document.getElementById('keyboard-shortcuts-toggle').checked = this.settings.enableKeyboardShortcuts;
         document.getElementById('sound-notifications-toggle').checked = this.settings.soundNotifications;
+        document.getElementById('mini-popup-toggle').checked = this.settings.enableMiniPopup;
 
         // Set AI provider values
         document.getElementById('ai-provider-select').value = this.settings.aiProvider;
@@ -642,6 +649,7 @@ class SettingsManager {
         this.settings.autoScrollToBottom = modal.querySelector('#auto-scroll-toggle').checked;
         this.settings.enableKeyboardShortcuts = modal.querySelector('#keyboard-shortcuts-toggle').checked;
         this.settings.soundNotifications = modal.querySelector('#sound-notifications-toggle').checked;
+        this.settings.enableMiniPopup = modal.querySelector('#mini-popup-toggle').checked;
 
         // AI Provider settings
         this.settings.aiProvider = modal.querySelector('#ai-provider-select').value;
