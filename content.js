@@ -1731,7 +1731,11 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
         }, 10);
     });
 
-    // Hide popup when clicking elsewhere (more persistent)
+    // Hide popup when double-clicking elsewhere (prevents accidental dismissal)
+    let clickCount = 0;
+    let clickTimer = null;
+    let lastClickTime = 0;
+    
     document.addEventListener('mousedown', (e) => {
         if (miniPopup && !miniPopup.contains(e.target) && isPopupVisible) {
             // Only hide if clicking far from the popup
@@ -1747,9 +1751,35 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
                 clickY <= popupRect.bottom + buffer;
 
             if (!isNearPopup) {
-                const selection = window.getSelection();
-                if (selection.isCollapsed) {
-                    hideTimeout = setTimeout(hidePopup, 500); // Longer delay
+                const currentTime = Date.now();
+                const timeDiff = currentTime - lastClickTime;
+                
+                // Reset click count if too much time has passed (500ms)
+                if (timeDiff > 500) {
+                    clickCount = 0;
+                }
+                
+                clickCount++;
+                lastClickTime = currentTime;
+                
+                // Clear existing timer
+                if (clickTimer) {
+                    clearTimeout(clickTimer);
+                    clickTimer = null;
+                }
+                
+                // Only hide on double-click
+                if (clickCount >= 2) {
+                    const selection = window.getSelection();
+                    if (selection.isCollapsed) {
+                        hideTimeout = setTimeout(hidePopup, 100); // Quick hide on double-click
+                    }
+                    clickCount = 0; // Reset after double-click
+                } else {
+                    // Reset click count after timeout if no second click
+                    clickTimer = setTimeout(() => {
+                        clickCount = 0;
+                    }, 500);
                 }
             }
         }
