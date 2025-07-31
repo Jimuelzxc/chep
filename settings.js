@@ -184,28 +184,7 @@ class SettingsManager {
                             </div>
 
                         </div>
-                        <div class="settings-section">
-                            <h3>Appearance</h3>
-                            <div class="setting-item">
-                                <label for="theme-select">Theme:</label>
-                                <select id="theme-select">
-                                    <option value="dark">Dark</option>
-                                    <option value="light">Light</option>
-                                    <option value="auto">Auto</option>
-                                </select>
-                            </div>
-                            <div class="setting-item">
-                                <label for="font-size-slider">Font Size:</label>
-                                <input type="range" id="font-size-slider" min="12" max="20" value="${this.settings.fontSize}">
-                                <span class="setting-value">${this.settings.fontSize}px</span>
-                            </div>
-                            <div class="setting-item">
-                                <label for="compact-mode-toggle">Compact Mode:</label>
-                                <input type="checkbox" id="compact-mode-toggle" ${this.settings.compactMode ? 'checked' : ''}>
-                            </div>
-                        </div>
-
-                        <div class="settings-section">
+<div class="settings-section">
                             <h3>Chat Behavior</h3>
                             <div class="setting-item">
                                 <label for="auto-open-transcript-toggle">Auto-open Transcript:</label>
@@ -227,9 +206,13 @@ class SettingsManager {
                                 <span class="setting-value">${this.settings.maxChatHistory}</span>
                             </div>
                         </div>
-
-                        <div class="settings-section">
+<div class="settings-section">
                             <h3>Features</h3>
+                            <div class="setting-item">
+                                <label for="mini-popup-toggle">Enable Mini Assistant:</label>
+                                <input type="checkbox" id="mini-popup-toggle" ${this.settings.enableMiniPopup ? 'checked' : ''}>
+                            </div>
+
                             <div class="setting-item">
                                 <label for="timestamp-links-toggle">Enable Timestamp Links:</label>
                                 <input type="checkbox" id="timestamp-links-toggle" ${this.settings.enableTimestampLinks ? 'checked' : ''}>
@@ -254,11 +237,31 @@ class SettingsManager {
                                 <label for="sound-notifications-toggle">Sound Notifications:</label>
                                 <input type="checkbox" id="sound-notifications-toggle" ${this.settings.soundNotifications ? 'checked' : ''}>
                             </div>
+                        </div>
+                        <div class="settings-section">
+                            <h3>Appearance</h3>
                             <div class="setting-item">
-                                <label for="mini-popup-toggle">Enable Mini Assistant:</label>
-                                <input type="checkbox" id="mini-popup-toggle" ${this.settings.enableMiniPopup ? 'checked' : ''}>
+                                <label for="theme-select">Theme:</label>
+                                <select id="theme-select">
+                                    <option value="dark">Dark</option>
+                                    <option value="light">Light</option>
+                                    <option value="auto">Auto</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label for="font-size-slider">Font Size:</label>
+                                <input type="range" id="font-size-slider" min="12" max="20" value="${this.settings.fontSize}">
+                                <span class="setting-value">${this.settings.fontSize}px</span>
+                            </div>
+                            <div class="setting-item">
+                                <label for="compact-mode-toggle">Compact Mode:</label>
+                                <input type="checkbox" id="compact-mode-toggle" ${this.settings.compactMode ? 'checked' : ''}>
                             </div>
                         </div>
+
+                        
+
+                        
                     </div>
                     <div class="settings-footer">
                         <button class="settings-reset-btn">Reset to Defaults</button>
