@@ -1205,7 +1205,7 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
     const popupStyle = document.createElement('style');
     popupStyle.textContent = `
         .mini-llm-popup {
-            position: absolute;
+            position: fixed;
             background: #1a1a1a;
             border: 1px solid #3ea6ff;
             border-radius: 8px;
@@ -1470,24 +1470,45 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
 
-        // Calculate position
+        // Calculate position relative to viewport (fixed positioning)
         let left = rect.left + (rect.width / 2) - 150; // Center horizontally
         let top = rect.bottom + 10; // Position below selection
 
-        // Adjust if popup would go off-screen
-        const popupRect = popup.getBoundingClientRect();
+        // Get viewport dimensions
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        // Horizontal adjustment
+        // Ensure popup is fully visible horizontally
+        const popupWidth = 300; // max-width from CSS
         if (left < 10) left = 10;
-        if (left + 300 > viewportWidth - 10) left = viewportWidth - 310;
+        if (left + popupWidth > viewportWidth - 10) left = viewportWidth - popupWidth - 10;
+
+        // Ensure popup is fully visible vertically
+        // First, temporarily show popup to get its height
+        popup.style.visibility = 'hidden';
+        popup.style.display = 'block';
+        const popupHeight = popup.offsetHeight;
+        popup.style.visibility = '';
+        popup.style.display = '';
 
         // Vertical adjustment - show above if not enough space below
-        if (top + popupRect.height > viewportHeight - 10) {
-            top = rect.top - popupRect.height - 10;
+        if (top + popupHeight > viewportHeight - 10) {
+            top = rect.top - popupHeight - 10;
+            // If still not enough space above, position optimally within viewport
+            if (top < 10) {
+                // Position popup in the middle of available space or at selection level
+                const availableSpace = viewportHeight - 20; // 10px margin on each side
+                if (popupHeight < availableSpace) {
+                    // Center vertically around the selection if possible
+                    const selectionCenter = rect.top + (rect.height / 2);
+                    top = Math.max(10, Math.min(selectionCenter - (popupHeight / 2), viewportHeight - popupHeight - 10));
+                } else {
+                    top = 10; // Fallback to top if popup is too tall
+                }
+            }
         }
 
+        // Apply fixed positioning (relative to viewport)
         popup.style.left = `${left}px`;
         popup.style.top = `${top}px`;
     }
@@ -1523,10 +1544,15 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
             miniPopup.classList.add('visible');
             isPopupVisible = true;
 
-            // Focus the input field for immediate typing
+            // Focus the input field for immediate typing without scrolling
             const input = miniPopup.querySelector('.mini-llm-popup-input');
             if (input) {
-                input.focus();
+                // Prevent focus from causing scroll
+                const scrollX = window.scrollX;
+                const scrollY = window.scrollY;
+                input.focus({ preventScroll: true });
+                // Restore scroll position if it changed
+                window.scrollTo(scrollX, scrollY);
             }
         }, 10);
     }
@@ -1590,7 +1616,7 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
 
         try {
             let contextText = '';
-            
+
             if (isContextEnabled) {
                 // Get video transcript if available, otherwise use simple context
                 let transcript = '';
@@ -1777,15 +1803,15 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
                 hideTimeout = null;
             }
 
-            const toggleSwitch = e.target.classList.contains('context-toggle-switch') ? 
+            const toggleSwitch = e.target.classList.contains('context-toggle-switch') ?
                 e.target : e.target.closest('.context-toggle-switch');
-            
+
             const isCurrentlyEnabled = toggleSwitch.dataset.contextEnabled === 'true';
             const newState = !isCurrentlyEnabled;
-            
+
             // Update toggle state
             toggleSwitch.dataset.contextEnabled = newState.toString();
-            
+
             if (newState) {
                 toggleSwitch.classList.add('enabled');
             } else {
@@ -1797,7 +1823,7 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
             const originalText = label.textContent;
             label.textContent = newState ? 'Context ON' : 'Context OFF';
             label.style.color = newState ? '#4ade80' : '#f87171';
-            
+
             setTimeout(() => {
                 label.textContent = originalText;
                 label.style.color = '#aaaaaa';
