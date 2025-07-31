@@ -53,6 +53,9 @@ This file tracks bugs, feature requests, and general notes for future reference 
 
 - ✅ **Custom Prompts - User-defined AI Behavior:** Add a textarea field in the AI Configuration section that allows users to define custom system prompts or behavior instructions for the AI. This would let users specify how they want the AI to respond (e.g., "respond in simple English," "be more concise," "explain like I'm 5," etc.). The custom prompt would be prepended to all AI requests to modify the AI's response style and behavior according to user preferences.
 
+- ✅ **Add Regenerate Button:** Implement a button that allows users to regenerate the AI's last response. This is useful when the response is erroneous or unsatisfactory, saving the user from re-typing their prompt. (Implemented with hover-to-show regenerate button on AI messages that maintains chat history and streams new responses)
+- ❌ **Mini LLM Popup on Text Selection:** When a user selects text on a page, a small popup should appear next to the selection. This popup will act as a mini-LLM interface, allowing the user to quickly ask questions or get information about the selected keyword or phrase.
+
 ## General Notes
 *Development thoughts, observations, and miscellaneous notes*
 

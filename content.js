@@ -137,6 +137,42 @@ function createAICompanionUI() {
             background-color: transparent;
             padding: 0;
         }
+        .message-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            justify-content: flex-start;
+        }
+        .regenerate-btn,
+        .copy-btn {
+            background: none;
+            border: 1px solid var(--yt-spec-border-color);
+            color: var(--yt-spec-text-secondary);
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .regenerate-btn:hover,
+        .copy-btn:hover {
+            background-color: var(--yt-spec-background-elevation-2);
+            color: var(--yt-spec-text-primary);
+            border-color: var(--yt-spec-blue-text);
+        }
+        .regenerate-btn:disabled,
+        .copy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .copy-btn.copied {
+            background-color: rgba(0, 255, 0, 0.1);
+            border-color: rgba(0, 255, 0, 0.3);
+            color: #4ade80;
+        }
         .md-content h1, .md-content h2, .md-content h3 {
             margin: 10px 0 5px;
         }
@@ -531,6 +567,210 @@ function createAICompanionUI() {
         displaySuggestedPrompts();
     }
 
+    function updateRegenerateButtonVisibility() {
+        // Remove regenerate button from all messages
+        const allRegenerateButtons = chatDisplay.querySelectorAll('.message-actions');
+        allRegenerateButtons.forEach(actions => actions.remove());
+
+        // Find the last AI message that's not a system message
+        const aiMessages = chatDisplay.querySelectorAll('.chat-message.ai');
+        if (aiMessages.length > 0) {
+            const lastAiMessage = aiMessages[aiMessages.length - 1];
+            const bubble = lastAiMessage.querySelector('.chat-bubble');
+            const text = bubble.textContent || bubble.innerText;
+            
+            // Only add regenerate button if it's not a system message and has content
+            if (text && !text.startsWith('⚠️') && !text.startsWith('🎬') && text.trim() !== '' && !text.includes("What's on your mind")) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+                
+                const regenerateBtn = document.createElement('button');
+                regenerateBtn.className = 'regenerate-btn';
+                regenerateBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                        <path d="M21 3v5h-5"></path>
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                        <path d="M3 21v-5h5"></path>
+                    </svg>
+                    Regenerate
+                `;
+                regenerateBtn.title = 'Regenerate response';
+                regenerateBtn.onclick = () => regenerateLastResponse(lastAiMessage);
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                    </svg>
+                    Copy
+                `;
+                copyBtn.title = 'Copy message';
+                copyBtn.onclick = () => copyMessage(lastAiMessage, copyBtn);
+                
+                actionsDiv.appendChild(regenerateBtn);
+                actionsDiv.appendChild(copyBtn);
+                lastAiMessage.appendChild(actionsDiv);
+            }
+        }
+    }
+
+    async function regenerateLastResponse(messageElement) {
+        // Find the last user message in chat history
+        if (chatHistory.length < 2) return; // Need at least one user message and one AI response
+        
+        // Get the last user message
+        const lastUserMessage = chatHistory[chatHistory.length - 2];
+        if (lastUserMessage.role !== 'user') return;
+        
+        // Remove the last AI response from history
+        chatHistory.pop();
+        
+        // Disable the regenerate button to prevent multiple clicks
+        const regenerateBtn = messageElement.querySelector('.regenerate-btn');
+        if (regenerateBtn) {
+            regenerateBtn.disabled = true;
+            regenerateBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+                </svg>
+                Regenerating...
+            `;
+        }
+        
+        // Get transcript
+        let transcript = getTranscriptText();
+        if (!transcript) {
+            appendChatMessage("⚠️ Could not access the transcript for regeneration.", 'ai');
+            return;
+        }
+        
+        // Check if AI provider is configured
+        const provider = settingsManager.get('aiProvider');
+        const isConfigured = checkAIProviderConfiguration(provider);
+        
+        if (!isConfigured) {
+            appendChatMessage("⚠️ AI provider not configured. Please go to Settings and add your API key.", 'ai');
+            return;
+        }
+        
+        // Remove the old AI message element
+        messageElement.remove();
+        
+        // Show typing indicator
+        const typingIndicator = appendTypingIndicator();
+        let fullResponse = '';
+        
+        try {
+            // Get new response from AI
+            const responseStream = await aiService.sendMessage(
+                transcript,
+                lastUserMessage.content,
+                chatHistory.slice(-settingsManager.get('maxChatHistory'))
+            );
+            
+            // Remove typing indicator and add new AI response bubble
+            typingIndicator.remove();
+            const aiBubble = appendChatMessage('', 'ai', true); // Mark as regenerating to avoid adding another regenerate button initially
+            
+            // Handle streaming response
+            for await (const chunk of responseStream) {
+                fullResponse += chunk;
+                aiBubble.innerHTML = parseMarkdown(fullResponse);
+                
+                // Only auto-scroll if user hasn't manually scrolled up and auto-scroll is enabled
+                if (settingsManager.get('autoScrollToBottom') && autoScrollEnabled && !isUserScrolling) {
+                    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+                }
+                
+                // Add typing delay if configured
+                const typingSpeed = settingsManager.get('typingSpeed');
+                if (typingSpeed > 0) {
+                    await new Promise(resolve => setTimeout(resolve, typingSpeed));
+                }
+            }
+            
+
+            
+            // Add new AI response to history
+            chatHistory.push({ role: 'assistant', content: fullResponse });
+            
+            // Update regenerate button visibility
+            updateRegenerateButtonVisibility();
+            
+        } catch (err) {
+            // Remove typing indicator on error
+            typingIndicator.remove();
+            appendChatMessage(`❌ Error regenerating response: ${err.message}`, 'ai');
+            
+            // Keep regenerate button available even after error
+            updateRegenerateButtonVisibility();
+        }
+    }
+
+    function copyMessage(messageElement, copyBtn) {
+        const bubble = messageElement.querySelector('.chat-bubble');
+        const text = bubble.textContent || bubble.innerText;
+        
+        // Use the modern clipboard API if available
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                showCopySuccess(copyBtn);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                fallbackCopyTextToClipboard(text, copyBtn);
+            });
+        } else {
+            // Fallback for older browsers or non-secure contexts
+            fallbackCopyTextToClipboard(text, copyBtn);
+        }
+    }
+
+    function fallbackCopyTextToClipboard(text, copyBtn) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showCopySuccess(copyBtn);
+            } else {
+                console.error('Fallback: Could not copy text');
+            }
+        } catch (err) {
+            console.error('Fallback: Could not copy text: ', err);
+        }
+        
+        document.body.removeChild(textArea);
+    }
+
+    function showCopySuccess(copyBtn) {
+        const originalHTML = copyBtn.innerHTML;
+        const originalClass = copyBtn.className;
+        
+        copyBtn.className = 'copy-btn copied';
+        copyBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"></path>
+            </svg>
+            Copied!
+        `;
+        
+        setTimeout(() => {
+            copyBtn.className = originalClass;
+            copyBtn.innerHTML = originalHTML;
+        }, 2000);
+    }
+
     function displaySuggestedPrompts() {
         suggestedPromptsContainer.innerHTML = ''; // Clear existing suggestions
         suggestedPromptsContainer.style.display = 'flex'; // Ensure it's visible
@@ -722,10 +962,16 @@ function createAICompanionUI() {
 
             // Add AI response to history
             chatHistory.push({ role: 'assistant', content: fullResponse });
+            
+            // Update regenerate button visibility (only show on last AI message)
+            updateRegenerateButtonVisibility();
         } catch (err) {
             // Remove typing indicator on error
             typingIndicator.remove();
             appendChatMessage(`❌ Error: ${err.message}`, 'ai');
+            
+            // Keep regenerate button available even after error
+            updateRegenerateButtonVisibility();
         } finally {
             chatSendButton.disabled = false;
         }
@@ -746,7 +992,7 @@ function createAICompanionUI() {
 
 
 
-    function appendChatMessage(text, sender) {
+    function appendChatMessage(text, sender, isRegenerating = false) {
         const messageEl = document.createElement('div');
         messageEl.className = `chat-message ${sender}`;
 
