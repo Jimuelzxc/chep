@@ -1,0 +1,1 @@
+Don’t write any code yet. First, confirm if you understand what I’m asking.

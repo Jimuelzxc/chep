@@ -510,7 +510,7 @@ function createAICompanionUI() {
             trashIconVisible = false;
             resetButton.style.display = 'none';
         } else {
-            textSpan.textContent = ' AI COMPANION';
+            textSpan.textContent = ' Chep';
             // Toggle trash icon visibility when expanded
             trashIconVisible = !trashIconVisible;
             resetButton.style.display = trashIconVisible ? 'flex' : 'none';
@@ -1485,7 +1485,7 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
         const rect = range.getBoundingClientRect();
 
         // Calculate position relative to viewport (fixed positioning)
-        let left = rect.left + (rect.width / 2) - 150; // Center horizontally
+        let left = rect.left + 10; // Align with left edge of selection plus a 10px offset
         let top = rect.bottom + 10; // Position below selection
 
         // Get viewport dimensions
