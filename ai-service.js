@@ -88,16 +88,14 @@ Your job is to:
 - **Maintain conversation context** by referring to previous exchanges when relevant.`;
 
         if (hasTimestamps) {
-            const enhancedTimestamps = this.settingsManager.get('enhancedTimestamps');
             systemPrompt += `
 - **Cite evidence with timestamps** by quoting relevant text and including the exact timestamp from the transcript. Format timestamps as clickable links like this: [0:45] or [1:23:45].
-- **Only use timestamps that actually exist in the transcript** - available timestamps include: ${availableTimestamps.slice(0, 10).join(', ')}${availableTimestamps.length > 10 ? '...' : ''}`;
-
-            if (enhancedTimestamps) {
-                systemPrompt += `
+- **Only use timestamps that actually exist in the transcript** - available timestamps include: ${availableTimestamps.slice(0, 10).join(', ')}${availableTimestamps.length > 10 ? '...' : ''}
 - **Provide context for timestamps** by briefly describing what happens at that moment in the video.
-- **When discussing a topic that spans multiple timestamps**, mention the time range (e.g., "from [2:15] to [4:30]").`;
-            }
+- **For each key point, provide a single, precise timestamp at the beginning of the point.**
+- **The timestamp must correspond to the exact moment *before* the speaker begins discussing the idea.**
+- **Format: [HH:MM:SS] Idea text...**
+- **CRITICAL: Do NOT use timestamp ranges. Do NOT place timestamps in the middle or at the end of a sentence.**`;
         } else {
             systemPrompt += `
 - **Quote relevant sections** from the transcript to support your answers, but note that this transcript doesn't include timestamps.`;

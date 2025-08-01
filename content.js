@@ -605,7 +605,7 @@ function createAICompanionUI() {
             const text = bubble.textContent || bubble.innerText;
 
             // Only add regenerate button if it's not a system message and has content
-            if (text && !text.startsWith('⚠️') && !text.startsWith('🎬') && text.trim() !== '' && !text.includes("What's on your mind")) {
+            if (text && !text.startsWith('🎬') && text.trim() !== '' && !text.includes("What's on your mind")) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'message-actions';
 
@@ -643,15 +643,25 @@ function createAICompanionUI() {
     }
 
     async function regenerateLastResponse(messageElement) {
-        // Find the last user message in chat history
-        if (chatHistory.length < 2) return; // Need at least one user message and one AI response
+        // If the last message in history is an assistant response (successful or error), pop it.
+        if (chatHistory.length > 0 && chatHistory[chatHistory.length - 1].role === 'assistant') {
+            chatHistory.pop();
+        }
 
-        // Get the last user message
-        const lastUserMessage = chatHistory[chatHistory.length - 2];
-        if (lastUserMessage.role !== 'user') return;
+        // Now the last message in history should be the user message we want to retry.
+        const lastUserMessage = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
+        if (!lastUserMessage || lastUserMessage.role !== 'user') {
+            console.error("Could not find user message to regenerate from.");
+            const btn = messageElement.querySelector('.regenerate-btn');
+            if (btn) {
+                btn.textContent = 'Error: No prompt found';
+                btn.disabled = true;
+            }
+            return;
+        }
 
-        // Remove the last AI response from history
-        chatHistory.pop();
+        // The history for the AI call is everything *before* this last user message.
+        const historyForAI = chatHistory.slice(0, -1);
 
         // Disable the regenerate button to prevent multiple clicks
         const regenerateBtn = messageElement.querySelector('.regenerate-btn');
@@ -694,7 +704,7 @@ function createAICompanionUI() {
             const responseStream = await aiService.sendMessage(
                 transcript,
                 lastUserMessage.content,
-                chatHistory.slice(-settingsManager.get('maxChatHistory'))
+                historyForAI.slice(-settingsManager.get('maxChatHistory'))
             );
 
             // Remove typing indicator and add new AI response bubble
@@ -718,8 +728,6 @@ function createAICompanionUI() {
                 }
             }
 
-
-
             // Add new AI response to history
             chatHistory.push({ role: 'assistant', content: fullResponse });
 
@@ -729,7 +737,10 @@ function createAICompanionUI() {
         } catch (err) {
             // Remove typing indicator on error
             typingIndicator.remove();
-            appendChatMessage(`❌ Error regenerating response: ${err.message}`, 'ai');
+            const errorMessage = `❌ Error regenerating response: ${err.message}`;
+            appendChatMessage(errorMessage, 'ai');
+            chatHistory.push({ role: 'assistant', content: errorMessage, error: true });
+
 
             // Keep regenerate button available even after error
             updateRegenerateButtonVisibility();
@@ -828,20 +839,23 @@ function createAICompanionUI() {
             const timestamp = bracketed || unbracketed;
             const parts = timestamp.split(':').map(Number);
             let seconds = 0;
+            let isValid = false;
 
             // Validate timestamp format
             if (parts.length === 3) { // HH:MM:SS
-                if (parts[0] >= 0 && parts[1] < 60 && parts[2] < 60) {
+                if (parts[0] >= 0 && parts[1] >= 0 && parts[1] < 60 && parts[2] >= 0 && parts[2] < 60) {
                     seconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+                    isValid = true;
                 }
             } else if (parts.length === 2) { // MM:SS
-                if (parts[0] >= 0 && parts[1] < 60) {
+                if (parts[0] >= 0 && parts[1] >= 0 && parts[1] < 60) {
                     seconds = parts[0] * 60 + parts[1];
+                    isValid = true;
                 }
             }
 
             // Only create clickable links for valid timestamps
-            if (seconds > 0) {
+            if (isValid) {
                 return `<a href="#" class="yt-timestamp-link" data-seconds="${seconds}">${timestamp}</a>`;
             }
             return match; // Return original if invalid

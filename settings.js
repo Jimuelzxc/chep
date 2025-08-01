@@ -7,7 +7,6 @@ class SettingsManager {
             chatHeight: 280,
             fontSize: 14,
             enableTimestampLinks: true,
-            enhancedTimestamps: true,
             typingSpeed: 50, // milliseconds delay between chunks
             maxChatHistory: 50,
             showLoadingAnimations: true,
@@ -216,10 +215,6 @@ class SettingsManager {
                             <div class="setting-item">
                                 <label for="timestamp-links-toggle">Enable Timestamp Links:</label>
                                 <input type="checkbox" id="timestamp-links-toggle" ${this.settings.enableTimestampLinks ? 'checked' : ''}>
-                            </div>
-                            <div class="setting-item">
-                                <label for="enhanced-timestamps-toggle">Enhanced Timestamp Context:</label>
-                                <input type="checkbox" id="enhanced-timestamps-toggle" ${this.settings.enhancedTimestamps ? 'checked' : ''}>
                             </div>
                             <div class="setting-item">
                                 <label for="loading-animations-toggle">Show Loading Animations:</label>
@@ -647,7 +642,6 @@ class SettingsManager {
         this.settings.typingSpeed = parseInt(modal.querySelector('#typing-speed-slider').value);
         this.settings.maxChatHistory = parseInt(modal.querySelector('#max-history-slider').value);
         this.settings.enableTimestampLinks = modal.querySelector('#timestamp-links-toggle').checked;
-        this.settings.enhancedTimestamps = modal.querySelector('#enhanced-timestamps-toggle').checked;
         this.settings.showLoadingAnimations = modal.querySelector('#loading-animations-toggle').checked;
         this.settings.autoScrollToBottom = modal.querySelector('#auto-scroll-toggle').checked;
         this.settings.enableKeyboardShortcuts = modal.querySelector('#keyboard-shortcuts-toggle').checked;
