@@ -7,7 +7,10 @@
 
   <p>
     <a href="https://addons.mozilla.org/en-US/firefox/addon/chep/">
-      <img src="https://img.shields.io/badge/Firefox-Add--on-FF7139?style=for-the-badge&logo=firefox&logoColor=white" alt="Firefox Add-on">
+      <img src="https://img.shields.io/badge/Firefox-Add--on-FF7139?style=for-the-badge&logoColor=white" alt="Firefox Add-on">
+    </a>
+    <a href="https://chep-ai.vercel.app/">
+      <img src="https://img.shields.io/badge/Website-chep--ai-blue?style=for-the-badge&logo=globe&logoColor=white" alt="Website">
     </a>
   </p>
 </div>
