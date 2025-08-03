@@ -181,20 +181,33 @@ function createAICompanionUI() {
         .md-content ul {
             padding-left: 20px;
         }
-        .chat-input-container { display: flex; gap: 10px; }
+        .chat-input-container { 
+            display: flex; 
+            width: 100%;
+        }
         .chat-input-wrapper {
             flex-grow: 1;
             position: relative;
-        }
-        #chat-input-ext {
-            width: 100%;
-            padding: 10px 16px;
+            display: flex;
+            align-items: center;
             border: 1px solid var(--yt-spec-border-color);
             background-color: #121212;
-            color: var(--yt-spec-text-primary);
-            border-radius: 20px;
-            font-size: 14px;
+            border-radius: 8px;
             transition: all 0.3s ease;
+        }
+        .chat-input-wrapper:focus-within {
+            border-color: var(--yt-spec-blue-text);
+            box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
+        }
+        #chat-input-ext {
+            flex-grow: 1;
+            padding: 12px 16px;
+            padding-right: 50px;
+            border: none;
+            background: transparent;
+            color: var(--yt-spec-text-primary);
+            font-size: 14px;
+            outline: none;
             box-sizing: border-box;
         }
         .slash-commands-dropdown {
@@ -242,12 +255,7 @@ function createAICompanionUI() {
         .slash-command-item.selected .slash-command-value {
             color: rgba(255, 255, 255, 0.8);
         }
-        #chat-input-ext:focus {
-            outline: none;
-            border-color: var(--yt-spec-blue-text);
-            box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
-        }
-        #chat-input-ext.focus-animation {
+        .chat-input-wrapper.focus-animation {
             animation: focusGlow 1.5s ease-out;
         }
         @keyframes focusGlow {
@@ -265,13 +273,17 @@ function createAICompanionUI() {
             }
         }
         #chat-send-btn-ext {
-            height: 40px;
-            width: 40px;
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 32px;
+            width: 32px;
             border: none;
             background: var(--gradient-primary);
             color: white;
             cursor: pointer;
-            border-radius: 20px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -279,7 +291,6 @@ function createAICompanionUI() {
             font-weight: 500;
             font-size: 14px;
             box-shadow: var(--gradient-glow);
-            position: relative;
             overflow: hidden;
         }
         #chat-send-btn-ext::before {
@@ -455,10 +466,10 @@ function createAICompanionUI() {
                 <div class="chat-input-wrapper">
                     <div class="slash-commands-dropdown" id="slash-commands-dropdown-ext"></div>
                     <input type="text" id="chat-input-ext" placeholder="Ask a question... (type / for shortcuts)">
+                    <button id="chat-send-btn-ext" title="Ask">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+                    </button>
                 </div>
-                <button id="chat-send-btn-ext" title="Ask">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
-                </button>
             </div>
         </div>
     `;
