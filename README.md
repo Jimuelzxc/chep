@@ -24,6 +24,7 @@
 - **Multiple AI providers**: OpenAI, Google Gemini, OpenRouter
 - **Video summaries**: Get key points from long videos
 - **Timestamp responses**: AI answers include time links
+- **Slash commands**: Quick shortcuts for common prompts (type `/` to see options)
 - **Custom settings**: Change how AI talks and acts
 - **Private**: Your chats stay between you and the AI service
 
@@ -58,6 +59,19 @@ Then open chep settings on any YouTube page and enter your key.
 - "What did they say about [topic]?"
 
 AI will respond with timestamps so you can jump to the right parts.
+
+### Slash Commands
+
+Type `/` in the chat to see quick shortcuts:
+- `/summary` - Get a brief summary
+- `/key` - What are the key points?
+- `/explain` - Explain this in detail
+- `/simple` - Use simple English
+- `/formal` - Use formal tone
+- `/beginner` - Explain for beginners
+- `/technical` - Give technical details
+
+You can also create custom slash commands in the settings (Ctrl+Shift+C).
 
 ## Contributing
 
