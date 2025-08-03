@@ -8,14 +8,14 @@ function createAICompanionUI() {
     const style = document.createElement('style');
     style.textContent = `
         :root {
-            --yt-spec-blue-text: #3ea6ff;
+            --yt-spec-blue-text: #3ea2ffff;
             --yt-spec-background-elevation-1: #212121;
             --yt-spec-background-elevation-2: #3f3f3f;
             --yt-spec-text-primary: #ffffff;
             --yt-spec-text-secondary: #aaaaaa;
             --yt-spec-border-color: #535353;
-            --gradient-primary: linear-gradient(135deg, #0066ff, #3ea6ff, #66b3ff, #99ccff, #cce6ff);
-            --gradient-glow: 0 0 30px rgba(0, 102, 255, 0.4), 0 0 60px rgba(62, 166, 255, 0.3), 0 0 90px rgba(102, 179, 255, 0.2);
+            --gradient-primary: linear-gradient(135deg, #0066ff, #3e7bffff, #66b3ff, #99b1ffff, #cce6ff);
+            --gradient-glow: 0 0 30px rgba(0, 102, 255, 0.88), 0 0 60px rgba(33, 143, 240, 0.47), 0 0 90px rgba(102, 179, 255, 0.2);
         }
         #ai-companion-container-ext {
             font-family: 'Roboto', Arial, sans-serif;
@@ -34,8 +34,13 @@ function createAICompanionUI() {
             align-items: center;
             padding: 12px 16px;
             user-select: none;
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(62, 166, 255, 0.08), rgba(102, 179, 255, 0.06));
-            border-bottom: 1px solid rgba(62, 166, 255, 0.2);
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.09), rgba(62, 165, 255, 0.07), rgba(102, 179, 255, 0.06));
+            transition: background 0.2s ease-in-out;
+        }
+        .ai-header:hover{
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.42), rgba(62, 165, 255, 0.36), rgba(102, 179, 255, 0.06));
+        
+        
         }
         .ai-header-left {
             display: flex;
@@ -215,7 +220,7 @@ function createAICompanionUI() {
             bottom: 100%;
             left: 0;
             right: 0;
-            background-color: var(--yt-spec-background-elevation-2);
+            background-color: #303030ff;
             border: 1px solid var(--yt-spec-border-color);
             border-radius: 8px;
             margin-bottom: 8px;
@@ -277,8 +282,8 @@ function createAICompanionUI() {
             right: 8px;
             top: 50%;
             transform: translateY(-50%);
-            height: 32px;
-            width: 32px;
+            height: 30px;
+            width: 30px;
             border: none;
             background: var(--gradient-primary);
             color: white;
@@ -290,36 +295,13 @@ function createAICompanionUI() {
             transition: all 0.3s ease;
             font-weight: 500;
             font-size: 14px;
-            box-shadow: var(--gradient-glow);
             overflow: hidden;
         }
-        #chat-send-btn-ext::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        #chat-send-btn-ext:hover::before {
-            opacity: 1;
-        }
         #chat-send-btn-ext:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--gradient-glow), 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-        #chat-send-btn-ext:disabled {
-            background: #3f3f3f;
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-        #chat-send-btn-ext:disabled::before {
-            opacity: 0;
-        }
+            background: var(--gradient-primary);
+            box-shadow: var(--gradient-glow);
+
+}
         .yt-timestamp-link {
             color: var(--yt-spec-blue-text);
             text-decoration: none;
@@ -394,7 +376,7 @@ function createAICompanionUI() {
             background-color: var(--yt-spec-background-elevation-2);
             color: var(--yt-spec-text-primary);
             border: 1px solid var(--yt-spec-border-color);
-            border-radius: 16px;
+            border-radius: 5px;
             padding: 8px 12px;
             font-size: 13px;
             cursor: pointer;
