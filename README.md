@@ -2,7 +2,7 @@
   <img src="./assets/logo-main.png" alt="chep Logo" width="150"/>
   <h1>chep</h1>
   <p>
-    AI-powered Firefox extension for YouTube. Chat with AI about any video, get summaries, and learn more while watching.
+    <strong>Chat with AI about any YouTube video. Ask questions, get summaries, and learn more while you watch.</strong>
   </p>
 
   <p>
@@ -19,67 +19,91 @@
   <img src="./assets/chep-demo.gif" alt="chep demo" width="100%" style="max-width: 600px; margin: 20px 0;"/>
 </div>
 
-## Features
+## ✨ Features
 
-- **Multiple AI providers**: OpenAI, Google Gemini, OpenRouter
-- **Video summaries**: Get key points from long videos
-- **Timestamp responses**: AI answers include time links
-- **Slash commands**: Quick shortcuts for common prompts (type `/` to see options)
-- **Custom settings**: Change how AI talks and acts
-- **Private**: Your chats stay between you and the AI service
+- **💬 Instant Chat**: Ask questions and get immediate AI responses about any video content
+- **⏰ Time Links**: AI answers include timestamps so you can jump to the right part of the video easily
+- **⚡ Slash Commands**: Quick shortcuts for common prompts - type `/` to see options like `/summary`, `/explain`, or create your own
+- **🤖 Different AI Options**: Works with OpenAI, Google Gemini, and OpenRouter using your own API keys
+- **🎯 Easy to Use**: Works right on YouTube pages with a simple, clean design that stays out of your way
+- **🔒 Private**: Your chats stay between you and the AI service you pick. We don't save your data
 
-## Installation
+## 🚀 Installation
 
-**Easy way:**
-1. Go to [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/chep/)
-2. Click "Add to Firefox"
-3. Set up your AI provider
-4. Start chatting on YouTube!
+### Option 1: Firefox Add-ons Store (Recommended)
+1. Visit the [Firefox Add-ons Store](https://addons.mozilla.org/en-US/firefox/addon/chep/)
+2. Click **"Add to Firefox"**
+3. Follow the setup instructions
+4. Start chatting on any YouTube video!
 
-**From source:**
-1. Clone this repo: `git clone https://github.com/Jimuelzxc/chep.git`
-2. Open Firefox → `about:debugging`
-3. Click "This Firefox" → "Load Temporary Add-on"
-4. Select `manifest.json`
+### Option 2: Install from Source
+```bash
+# Clone the repository
+git clone https://github.com/Jimuelzxc/chep.git
+cd chep
 
-## Setup
+# Load in Firefox
+# 1. Open Firefox and go to about:debugging
+# 2. Click "This Firefox"
+# 3. Click "Load Temporary Add-on"
+# 4. Select the manifest.json file
+```
 
-You need an API key from one of these:
+> **Note**: The extension is completely free, but you'll need your own API key from one of the supported AI providers.
 
-- **Google Gemini** (recommended - easy to access): Get key at [aistudio.google.com](https://aistudio.google.com/app/apikey)
-- **OpenAI**: Get key at [platform.openai.com](https://platform.openai.com/api-keys)
-- **OpenRouter**: Get key at [openrouter.ai](https://openrouter.ai/)
+## ⚙️ Setup
 
-Then open chep settings on any YouTube page and enter your key.
+### Get Your API Key
 
-## Usage
+Choose one of these AI providers and get your API key:
 
-- "What is this video about?"
-- "Summarize this video"
-- "What did they say about [topic]?"
+| Provider | Difficulty | Cost | Get API Key |
+|----------|------------|------|-------------|
+| **Google Gemini** ⭐ | Easy | Free tier available | [Get Key](https://aistudio.google.com/app/apikey) |
+| **OpenAI** | Medium | Pay per use | [Get Key](https://platform.openai.com/api-keys) |
+| **OpenRouter** | Medium | Pay per use | [Get Key](https://openrouter.ai/) |
 
-AI will respond with timestamps so you can jump to the right parts.
+> **💡 Tip**: We recommend starting with Google Gemini as it's the easiest to set up and has a generous free tier.
 
-### Slash Commands
 
-Type `/` in the chat to see quick shortcuts:
-- `/summary` - Get a brief summary
-- `/key` - What are the key points?
-- `/explain` - Explain this in detail
-- `/simple` - Use simple English
-- `/formal` - Use formal tone
-- `/beginner` - Explain for beginners
-- `/technical` - Give technical details
 
-You can also create custom slash commands in the settings (Ctrl+Shift+C).
 
-## Contributing
 
-1. Fork the repo
-2. Make your changes
-3. Test on YouTube videos
-4. Submit a pull request
+## 🤝 Contributing
 
-## License
+We welcome contributions! Here's how you can help:
 
-MIT License - see [LICENSE](LICENSE) file.
+1. **🍴 Fork** the repository
+2. **🌿 Create** a feature branch: `git checkout -b feature/amazing-feature`
+3. **✅ Test** your changes on various YouTube videos
+4. **📝 Commit** your changes: `git commit -m 'Add amazing feature'`
+5. **🚀 Push** to the branch: `git push origin feature/amazing-feature`
+6. **📬 Submit** a pull request
+
+### 🐛 Bug Reports
+Found a bug? Please [open an issue](https://github.com/Jimuelzxc/chep/issues) with:
+- Steps to reproduce
+- Expected vs actual behavior
+- Browser version and OS
+- Screenshots if applicable
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Thanks to all the AI providers for their APIs
+- Firefox extension community for guidance
+- All contributors and users who help improve chep
+
+---
+
+<div align="center">
+  <p>Made with ❤️ for YouTube enthusiasts</p>
+  <p>
+    <a href="https://chep-ai.vercel.app/">Website</a> • 
+    <a href="https://addons.mozilla.org/en-US/firefox/addon/chep/">Firefox Store</a> • 
+    <a href="https://github.com/Jimuelzxc/chep/issues">Report Bug</a>
+  </p>
+</div>
