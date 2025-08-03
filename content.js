@@ -50,7 +50,8 @@ function createAICompanionUI() {
         }
         .expand-btn,
         .reset-btn,
-        .settings-btn {
+        .settings-btn,
+        .slash-commands-btn {
             background: none;
             border: none;
             color: var(--yt-spec-text-secondary);
@@ -64,7 +65,8 @@ function createAICompanionUI() {
         }
         .expand-btn:hover,
         .reset-btn:hover,
-        .settings-btn:hover {
+        .settings-btn:hover,
+        .slash-commands-btn:hover {
             background-color: var(--yt-spec-background-elevation-2);
             color: var(--yt-spec-text-primary);
         }
@@ -180,8 +182,12 @@ function createAICompanionUI() {
             padding-left: 20px;
         }
         .chat-input-container { display: flex; gap: 10px; }
-        #chat-input-ext {
+        .chat-input-wrapper {
             flex-grow: 1;
+            position: relative;
+        }
+        #chat-input-ext {
+            width: 100%;
             padding: 10px 16px;
             border: 1px solid var(--yt-spec-border-color);
             background-color: #121212;
@@ -189,7 +195,52 @@ function createAICompanionUI() {
             border-radius: 20px;
             font-size: 14px;
             transition: all 0.3s ease;
-            position: relative;
+            box-sizing: border-box;
+        }
+        .slash-commands-dropdown {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--yt-spec-background-elevation-2);
+            border: 1px solid var(--yt-spec-border-color);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .slash-command-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--yt-spec-border-color);
+            transition: background-color 0.2s ease;
+        }
+        .slash-command-item:last-child {
+            border-bottom: none;
+        }
+        .slash-command-item:hover,
+        .slash-command-item.selected {
+            background-color: var(--yt-spec-blue-text);
+            color: white;
+        }
+        .slash-command-key {
+            color: var(--yt-spec-blue-text);
+            font-weight: 500;
+        }
+        .slash-command-item:hover .slash-command-key,
+        .slash-command-item.selected .slash-command-key {
+            color: white;
+        }
+        .slash-command-value {
+            color: var(--yt-spec-text-secondary);
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        .slash-command-item:hover .slash-command-value,
+        .slash-command-item.selected .slash-command-value {
+            color: rgba(255, 255, 255, 0.8);
         }
         #chat-input-ext:focus {
             outline: none;
@@ -383,6 +434,11 @@ function createAICompanionUI() {
                         <line x1="14" y1="11" x2="14" y2="17"></line>
                     </svg>
                 </button>
+                <button class="slash-commands-btn" title="Slash Commands (Ctrl+Shift+C)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 8l-4 4 4 4M17 8l4 4-4 4M14 4l-4 16"></path>
+                    </svg>
+                </button>
                 <button class="settings-btn" title="Settings">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2.82l-.15.1a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1 0-2.82l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
@@ -396,7 +452,10 @@ function createAICompanionUI() {
             <div id="chat-display-ext"></div>
             <div class="suggested-prompts-container" id="suggested-prompts-ext"></div>
             <div class="chat-input-container">
-                <input type="text" id="chat-input-ext" placeholder="Ask a question...">
+                <div class="chat-input-wrapper">
+                    <div class="slash-commands-dropdown" id="slash-commands-dropdown-ext"></div>
+                    <input type="text" id="chat-input-ext" placeholder="Ask a question... (type / for shortcuts)">
+                </div>
                 <button id="chat-send-btn-ext" title="Ask">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
                 </button>
@@ -408,6 +467,45 @@ function createAICompanionUI() {
     // --- Initialize Settings Manager and AI Service ---
     const settingsManager = new window.SettingsManager();
     const aiService = new window.AIService(settingsManager);
+
+    // --- Slash Commands System ---
+    const defaultSlashCommands = {
+        '/simple': 'use simple english',
+        '/formal': 'use formal tone',
+        '/explain': 'explain this in detail',
+        '/summary': 'give me a brief summary',
+        '/key': 'what are the key points?',
+        '/main': 'what is the main topic?',
+        '/takeaway': 'what are the key takeaways?',
+        '/beginner': 'explain this for beginners',
+        '/technical': 'give me technical details',
+        '/examples': 'provide examples'
+    };
+
+    // Load custom slash commands from storage
+    let customSlashCommands = {};
+    try {
+        const stored = localStorage.getItem('ai-companion-slash-commands');
+        if (stored) {
+            customSlashCommands = JSON.parse(stored);
+        }
+    } catch (e) {
+        console.warn('Failed to load custom slash commands:', e);
+    }
+
+    // Combine default and custom commands
+    function getAllSlashCommands() {
+        return { ...defaultSlashCommands, ...customSlashCommands };
+    }
+
+    // Save custom commands to storage
+    function saveCustomSlashCommands() {
+        try {
+            localStorage.setItem('ai-companion-slash-commands', JSON.stringify(customSlashCommands));
+        } catch (e) {
+            console.warn('Failed to save custom slash commands:', e);
+        }
+    }
 
     // --- Initialize Mini LLM Popup ---
     let miniPopupInitialized = false;
@@ -439,15 +537,19 @@ function createAICompanionUI() {
     const headerLeft = container.querySelector('.ai-header-left');
     const resetButton = container.querySelector('.reset-btn');
     const settingsButton = container.querySelector('.settings-btn');
+    const slashCommandsButton = container.querySelector('.slash-commands-btn');
     const chatDisplay = document.getElementById('chat-display-ext');
     const chatInput = document.getElementById('chat-input-ext');
     const chatSendButton = document.getElementById('chat-send-btn-ext');
     const suggestedPromptsContainer = document.getElementById('suggested-prompts-ext');
+    const slashCommandsDropdown = document.getElementById('slash-commands-dropdown-ext');
     let isFirstOpen = true;
     let chatHistory = []; // Store conversation history
     let isUserScrolling = false; // Track if user is manually scrolling
     let autoScrollEnabled = true; // Track if auto-scroll should be enabled
     let trashIconVisible = false; // Track trash icon visibility state
+    let selectedCommandIndex = -1; // Track selected command in dropdown
+    let filteredCommands = []; // Store filtered commands for dropdown
 
     // --- Event Listeners ---
     chatDisplay.addEventListener('click', (e) => {
@@ -538,13 +640,28 @@ function createAICompanionUI() {
         settingsManager.showSettings();
     };
 
+    slashCommandsButton.onclick = (e) => {
+        e.stopPropagation(); // Prevent header click
+        showSlashCommandsManager();
+    };
+
     resetButton.onclick = (e) => {
         e.stopPropagation(); // Prevent header click
         resetChat();
     };
 
     chatSendButton.onclick = handleChat;
-    chatInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleChat(); } };
+
+    // Enhanced input handling with slash commands
+    chatInput.oninput = handleInputChange;
+    chatInput.onkeydown = handleInputKeydown;
+
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!chatInput.contains(e.target) && !slashCommandsDropdown.contains(e.target)) {
+            hideSlashCommandsDropdown();
+        }
+    });
 
     // Apply initial settings
     settingsManager.applySettings();
@@ -557,6 +674,135 @@ function createAICompanionUI() {
             chatDisplay.scrollTop = chatDisplay.scrollHeight;
         }
     });
+
+    // Add slash commands management to settings
+    function showSlashCommandsManager() {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: var(--yt-spec-background-elevation-1);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: var(--yt-spec-text-primary);
+        `;
+
+        content.innerHTML = `
+            <h2 style="margin-top: 0; color: var(--yt-spec-blue-text);">Slash Commands Manager</h2>
+            <p style="color: var(--yt-spec-text-secondary); margin-bottom: 20px;">
+                Manage your custom slash commands. Type / in the chat to see all available commands.
+            </p>
+            
+            <div style="margin-bottom: 20px;">
+                <h3>Default Commands</h3>
+                <div id="default-commands-list" style="background: var(--yt-spec-background-elevation-2); padding: 12px; border-radius: 8px; font-size: 12px;"></div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <h3>Custom Commands</h3>
+                <div id="custom-commands-list"></div>
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <input type="text" id="new-command-key" placeholder="/mycommand" style="flex: 1; padding: 8px; background: var(--yt-spec-background-elevation-2); border: 1px solid var(--yt-spec-border-color); border-radius: 4px; color: var(--yt-spec-text-primary);">
+                    <input type="text" id="new-command-value" placeholder="expanded text" style="flex: 2; padding: 8px; background: var(--yt-spec-background-elevation-2); border: 1px solid var(--yt-spec-border-color); border-radius: 4px; color: var(--yt-spec-text-primary);">
+                    <button id="add-command-btn" style="padding: 8px 16px; background: var(--yt-spec-blue-text); color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button id="close-modal-btn" style="padding: 8px 16px; background: var(--yt-spec-background-elevation-2); color: var(--yt-spec-text-primary); border: 1px solid var(--yt-spec-border-color); border-radius: 4px; cursor: pointer;">Close</button>
+            </div>
+        `;
+
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        // Populate default commands
+        const defaultList = content.querySelector('#default-commands-list');
+        defaultList.innerHTML = Object.entries(defaultSlashCommands)
+            .map(([key, value]) => `<div><strong>${key}</strong> → ${value}</div>`)
+            .join('');
+
+        // Populate custom commands
+        updateCustomCommandsList();
+
+        function updateCustomCommandsList() {
+            const customList = content.querySelector('#custom-commands-list');
+            customList.innerHTML = Object.entries(customSlashCommands)
+                .map(([key, value]) => `
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px; background: var(--yt-spec-background-elevation-2); border-radius: 4px;">
+                        <strong style="color: var(--yt-spec-blue-text);">${key}</strong>
+                        <span>→</span>
+                        <span style="flex: 1;">${value}</span>
+                        <button onclick="deleteCustomCommand('${key}')" style="padding: 4px 8px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+                    </div>
+                `).join('') || '<div style="color: var(--yt-spec-text-secondary); font-style: italic;">No custom commands yet</div>';
+        }
+
+        // Add command functionality
+        content.querySelector('#add-command-btn').onclick = () => {
+            const keyInput = content.querySelector('#new-command-key');
+            const valueInput = content.querySelector('#new-command-value');
+            const key = keyInput.value.trim();
+            const value = valueInput.value.trim();
+
+            if (!key || !value) {
+                alert('Please enter both command and text');
+                return;
+            }
+
+            if (!key.startsWith('/')) {
+                alert('Command must start with /');
+                return;
+            }
+
+            if (defaultSlashCommands[key]) {
+                alert('Cannot override default commands');
+                return;
+            }
+
+            customSlashCommands[key] = value;
+            saveCustomSlashCommands();
+            updateCustomCommandsList();
+            keyInput.value = '';
+            valueInput.value = '';
+        };
+
+        // Delete command functionality
+        window.deleteCustomCommand = (key) => {
+            delete customSlashCommands[key];
+            saveCustomSlashCommands();
+            updateCustomCommandsList();
+        };
+
+        // Close modal
+        content.querySelector('#close-modal-btn').onclick = () => {
+            document.body.removeChild(modal);
+            delete window.deleteCustomCommand;
+        };
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                document.body.removeChild(modal);
+                delete window.deleteCustomCommand;
+            }
+        };
+    }
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
@@ -582,7 +828,136 @@ function createAICompanionUI() {
             e.preventDefault();
             chatInput.focus();
         }
+
+        // Ctrl/Cmd + Shift + C: Open slash commands manager
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
+            e.preventDefault();
+            showSlashCommandsManager();
+        }
     });
+
+    // --- Slash Commands Helper Functions ---
+    function handleInputChange() {
+        const value = chatInput.value;
+        const cursorPos = chatInput.selectionStart;
+
+        // Find if we're typing a slash command
+        const beforeCursor = value.substring(0, cursorPos);
+        const slashMatch = beforeCursor.match(/\/(\w*)$/);
+
+        if (slashMatch) {
+            const query = slashMatch[1].toLowerCase();
+            showSlashCommandsDropdown(query);
+        } else {
+            hideSlashCommandsDropdown();
+        }
+    }
+
+    function handleInputKeydown(e) {
+        const isDropdownVisible = slashCommandsDropdown.style.display === 'block';
+
+        if (isDropdownVisible) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedCommandIndex = Math.min(selectedCommandIndex + 1, filteredCommands.length - 1);
+                updateDropdownSelection();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedCommandIndex = Math.max(selectedCommandIndex - 1, -1);
+                updateDropdownSelection();
+            } else if (e.key === 'Tab' || e.key === 'Enter') {
+                if (selectedCommandIndex >= 0 && filteredCommands[selectedCommandIndex]) {
+                    e.preventDefault();
+                    selectSlashCommand(filteredCommands[selectedCommandIndex]);
+                } else if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    hideSlashCommandsDropdown();
+                    handleChat();
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                hideSlashCommandsDropdown();
+            }
+        } else if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleChat();
+        }
+    }
+
+    function showSlashCommandsDropdown(query = '') {
+        const allCommands = getAllSlashCommands();
+        filteredCommands = Object.entries(allCommands).filter(([key, value]) =>
+            key.toLowerCase().includes(query) || value.toLowerCase().includes(query)
+        );
+
+        if (filteredCommands.length === 0) {
+            hideSlashCommandsDropdown();
+            return;
+        }
+
+        selectedCommandIndex = -1;
+
+        slashCommandsDropdown.innerHTML = filteredCommands.map(([key, value]) => `
+            <div class="slash-command-item" data-command="${key}">
+                <span class="slash-command-key">${key}</span>
+                <span class="slash-command-value">${value}</span>
+            </div>
+        `).join('');
+
+        // Add click handlers
+        slashCommandsDropdown.querySelectorAll('.slash-command-item').forEach((item, index) => {
+            item.onclick = () => selectSlashCommand(filteredCommands[index]);
+        });
+
+        slashCommandsDropdown.style.display = 'block';
+    }
+
+    function hideSlashCommandsDropdown() {
+        slashCommandsDropdown.style.display = 'none';
+        selectedCommandIndex = -1;
+        filteredCommands = [];
+    }
+
+    function updateDropdownSelection() {
+        const items = slashCommandsDropdown.querySelectorAll('.slash-command-item');
+        items.forEach((item, index) => {
+            item.classList.toggle('selected', index === selectedCommandIndex);
+        });
+    }
+
+    function selectSlashCommand([key, value]) {
+        const currentValue = chatInput.value;
+        const cursorPos = chatInput.selectionStart;
+        const beforeCursor = currentValue.substring(0, cursorPos);
+        const afterCursor = currentValue.substring(cursorPos);
+
+        // Find the slash command to replace
+        const slashMatch = beforeCursor.match(/\/\w*$/);
+        if (slashMatch) {
+            const newBeforeCursor = beforeCursor.substring(0, slashMatch.index);
+            chatInput.value = newBeforeCursor + value + afterCursor;
+
+            // Position cursor after the inserted text
+            const newCursorPos = newBeforeCursor.length + value.length;
+            chatInput.setSelectionRange(newCursorPos, newCursorPos);
+        }
+
+        hideSlashCommandsDropdown();
+        chatInput.focus();
+    }
+
+    function processSlashCommands(text) {
+        const allCommands = getAllSlashCommands();
+        let processedText = text;
+
+        // Replace any remaining slash commands that weren't selected from dropdown
+        Object.entries(allCommands).forEach(([key, value]) => {
+            const regex = new RegExp(`\\${key}\\b`, 'gi');
+            processedText = processedText.replace(regex, value);
+        });
+
+        return processedText;
+    }
 
     // --- Helper Functions ---
     function resetChat() {
@@ -921,8 +1296,11 @@ function createAICompanionUI() {
     }
 
     async function handleChat() {
-        const message = chatInput.value.trim();
+        let message = chatInput.value.trim();
         if (!message) return;
+
+        // Process slash commands
+        message = processSlashCommands(message);
 
         let transcript = getTranscriptText();
         if (!transcript) {
@@ -1749,7 +2127,7 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
     let clickCount = 0;
     let clickTimer = null;
     let lastClickTime = 0;
-    
+
     document.addEventListener('mousedown', (e) => {
         if (miniPopup && !miniPopup.contains(e.target) && isPopupVisible) {
             // Only hide if clicking far from the popup
@@ -1767,21 +2145,21 @@ function initializeMiniLLMPopup(settingsManager, aiService, getTranscriptText) {
             if (!isNearPopup) {
                 const currentTime = Date.now();
                 const timeDiff = currentTime - lastClickTime;
-                
+
                 // Reset click count if too much time has passed (500ms)
                 if (timeDiff > 500) {
                     clickCount = 0;
                 }
-                
+
                 clickCount++;
                 lastClickTime = currentTime;
-                
+
                 // Clear existing timer
                 if (clickTimer) {
                     clearTimeout(clickTimer);
                     clickTimer = null;
                 }
-                
+
                 // Only hide on double-click
                 if (clickCount >= 2) {
                     const selection = window.getSelection();
