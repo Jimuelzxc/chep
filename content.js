@@ -865,14 +865,39 @@ function createAICompanionUI() {
                 e.preventDefault();
                 selectedCommandIndex = Math.max(selectedCommandIndex - 1, -1);
                 updateDropdownSelection();
-            } else if (e.key === 'Tab' || e.key === 'Enter') {
+            } else if (e.key === 'Tab' || e.key === 'Enter' || e.key === ' ') {
                 if (selectedCommandIndex >= 0 && filteredCommands[selectedCommandIndex]) {
                     e.preventDefault();
                     selectSlashCommand(filteredCommands[selectedCommandIndex]);
+                } else if (filteredCommands.length === 1) {
+                    // Auto-select if there's only one match
+                    e.preventDefault();
+                    selectSlashCommand(filteredCommands[0]);
                 } else if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     hideSlashCommandsDropdown();
                     handleChat();
+                } else if (e.key === ' ') {
+                    // For space, try to find exact match
+                    const currentValue = chatInput.value;
+                    const cursorPos = chatInput.selectionStart;
+                    const beforeCursor = currentValue.substring(0, cursorPos);
+                    const slashMatch = beforeCursor.match(/\/(\w+)$/);
+
+                    if (slashMatch) {
+                        const typedCommand = '/' + slashMatch[1];
+                        const exactMatch = filteredCommands.find(([key]) => key.toLowerCase() === typedCommand.toLowerCase());
+
+                        if (exactMatch) {
+                            e.preventDefault();
+                            selectSlashCommand(exactMatch);
+                            // Add the space after expansion
+                            setTimeout(() => {
+                                chatInput.value += ' ';
+                                chatInput.setSelectionRange(chatInput.value.length, chatInput.value.length);
+                            }, 0);
+                        }
+                    }
                 }
             } else if (e.key === 'Escape') {
                 e.preventDefault();
@@ -895,7 +920,8 @@ function createAICompanionUI() {
             return;
         }
 
-        selectedCommandIndex = -1;
+        // Auto-select first match if there's an exact match or if query is not empty
+        selectedCommandIndex = query ? 0 : -1;
 
         slashCommandsDropdown.innerHTML = filteredCommands.map(([key, value]) => `
             <div class="slash-command-item" data-command="${key}">
@@ -910,6 +936,7 @@ function createAICompanionUI() {
         });
 
         slashCommandsDropdown.style.display = 'block';
+        updateDropdownSelection();
     }
 
     function hideSlashCommandsDropdown() {
