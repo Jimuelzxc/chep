@@ -93,7 +93,7 @@ function createAICompanionUI() {
             transition: all 0.3s ease;
         }
         #ai-companion-container-ext.collapsed .ai-header-title span::after {
-            content: ' - Ask anything...';
+            content: ' - Ask a question...';
             font-weight: 400;
             opacity: 0.7;
             font-size: 0.9em;
