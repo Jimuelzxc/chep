@@ -4,7 +4,7 @@ class SettingsManager {
         this.defaultSettings = {
             theme: 'dark',
             autoOpenTranscript: true,
-            chatHeight: 280,
+            chatHeight: 400,
             fontSize: 14,
             enableTimestampLinks: true,
             typingSpeed: 50, // milliseconds delay between chunks

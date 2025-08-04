@@ -21,7 +21,7 @@ function createAICompanionUI() {
             font-family: 'Roboto', Arial, sans-serif;
             margin-bottom: 16px;
             color: var(--yt-spec-text-primary);
-            background-color: var(--yt-spec-background-elevation-1);
+            background-color: var(--yt--background-elevation-1);
             border-radius: 12px;
             border: 1px solid var(--yt-spec-border-color);
             padding: 0;
@@ -34,11 +34,12 @@ function createAICompanionUI() {
             align-items: center;
             padding: 12px 16px;
             user-select: none;
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.09), rgba(62, 165, 255, 0.07), rgba(102, 179, 255, 0.06));
-            transition: background 0.2s ease-in-out;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.09), rgba(62, 165, 255, 0.07), rgba(39, 90, 167, 0.4));
+            transition: background 0.4s ease-in-out;
+
         }
         .ai-header:hover{
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.42), rgba(62, 165, 255, 0.36), rgba(102, 179, 255, 0.06));
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.21), rgba(62, 165, 255, 0.26), rgba(102, 179, 255, 0.02));
         
         
         }
@@ -488,7 +489,8 @@ function createAICompanionUI() {
             <div class="ai-header-left">
                 <div class="ai-header-title">
                     <img src="${chrome.runtime.getURL('assets/chep-logo.png')}" alt="Chep" style="width: 24px; height: 24px; opacity: 90%; ">
-                    <span>Chep</span>
+                    <span style="transform: translate(-6px, 2px);">Chep</span>
+
                 </div>
             </div>
             <div class="ai-header-controls">
