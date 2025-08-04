@@ -54,6 +54,7 @@ class AIService {
 
     buildSystemPrompt(transcript, isMiniAssistant = false) {
         const customPrompt = this.settingsManager.get('customPrompt');
+        const hasTranscript = transcript && transcript.trim().length > 0;
 
         if (isMiniAssistant) {
             // Mini assistant mode - no timestamps, more concise
@@ -68,16 +69,18 @@ Your job is to:
             if (customPrompt && customPrompt.trim()) {
                 systemPrompt += `\n\nAdditional behavior instructions: ${customPrompt.trim()}`;
             }
-
-            systemPrompt += `\n\nContext:\n---\n${transcript}\n---`;
+            if (hasTranscript) {
+                systemPrompt += `\n\nContext:\n---\n${transcript}\n---`;
+            }
             return systemPrompt;
         }
 
-        // Regular mode with timestamps
-        const availableTimestamps = this.extractTimestamps(transcript);
-        const hasTimestamps = availableTimestamps.length > 0;
+        // Regular mode
+        if (hasTranscript) {
+            const availableTimestamps = this.extractTimestamps(transcript);
+            const hasTimestamps = availableTimestamps.length > 0;
 
-        let systemPrompt = `You are a helpful YouTube video assistant.
+            let systemPrompt = `You are a helpful YouTube video assistant.
 
 Your inputs are:
 1. The full transcript of the video (below, enclosed in triple dashes).
@@ -87,8 +90,8 @@ Your job is to:
 - **Answer the question concisely and accurately**, prioritizing information found in the transcript, but also using general knowledge when appropriate.
 - **Maintain conversation context** by referring to previous exchanges when relevant.`;
 
-        if (hasTimestamps) {
-            systemPrompt += `
+            if (hasTimestamps) {
+                systemPrompt += `
 - **Cite evidence with timestamps** by quoting relevant text and including the exact timestamp from the transcript. Format timestamps as clickable links like this: [0:45] or [1:23:45].
 - **Only use timestamps that actually exist in the transcript** - available timestamps include: ${availableTimestamps.slice(0, 10).join(', ')}${availableTimestamps.length > 10 ? '...' : ''}
 - **Provide context for timestamps** by briefly describing what happens at that moment in the video.
@@ -96,27 +99,34 @@ Your job is to:
 - **The timestamp must correspond to the exact moment *before* the speaker begins discussing the idea.**
 - **Format: [HH:MM:SS] Idea text...**
 - **CRITICAL: Do NOT use timestamp ranges. Do NOT place timestamps in the middle or at the end of a sentence.**`;
-        } else {
-            systemPrompt += `
+            } else {
+                systemPrompt += `
 - **Quote relevant sections** from the transcript to support your answers, but note that this transcript doesn't include timestamps.`;
-        }
+            }
 
-        systemPrompt += `
+            systemPrompt += `
 - If the transcript does not contain the information needed, say so and explain why.
 - Never invent or hallucinate any facts. Do not make up timestamps.
 - When referencing multiple parts of the video, organize your response chronologically when possible.`;
 
-        // Add custom behavior instructions if provided
-        if (customPrompt && customPrompt.trim()) {
-            systemPrompt += `\n\nAdditional behavior instructions: ${customPrompt.trim()}`;
-        }
+            if (customPrompt && customPrompt.trim()) {
+                systemPrompt += `\n\nAdditional behavior instructions: ${customPrompt.trim()}`;
+            }
 
-        systemPrompt += `\n\nTranscript:
+            systemPrompt += `\n\nTranscript:
 ---
 ${transcript}
 ---`;
+            return systemPrompt;
 
-        return systemPrompt;
+        } else {
+            // No transcript provided, use a generic prompt
+            let systemPrompt = `You are a helpful AI assistant. Your job is to answer questions accurately and concisely based on your general knowledge.`;
+            if (customPrompt && customPrompt.trim()) {
+                systemPrompt += `\n\nAdditional behavior instructions: ${customPrompt.trim()}`;
+            }
+            return systemPrompt;
+        }
     }
 
     async sendOpenAIMessage(transcript, message, history, isMiniAssistant = false) {
@@ -185,9 +195,14 @@ ${transcript}
         });
 
         // Add a model response to acknowledge the system prompt
+        // Add a model response to acknowledge the system prompt
+        const modelAcknowledgement = transcript && transcript.trim().length > 0
+            ? 'I understand. I will help you analyze this YouTube video transcript and answer questions about it accurately, citing specific timestamps when possible.'
+            : 'I understand. I am ready to help.';
+
         contents.push({
             role: 'model',
-            parts: [{ text: 'I understand. I will help you analyze this YouTube video transcript and answer questions about it accurately, citing specific timestamps when possible.' }]
+            parts: [{ text: modelAcknowledgement }]
         });
 
         // Add conversation history

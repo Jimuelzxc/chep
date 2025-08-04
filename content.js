@@ -56,7 +56,8 @@ function createAICompanionUI() {
         .expand-btn,
         .reset-btn,
         .settings-btn,
-        .slash-commands-btn {
+        .slash-commands-btn,
+        .video-context-btn {
             background: none;
             border: none;
             color: var(--yt-spec-text-secondary);
@@ -71,7 +72,8 @@ function createAICompanionUI() {
         .expand-btn:hover,
         .reset-btn:hover,
         .settings-btn:hover,
-        .slash-commands-btn:hover {
+        .slash-commands-btn:hover,
+        .video-context-btn:hover {
             background-color: var(--yt-spec-background-elevation-2);
             color: var(--yt-spec-text-primary);
         }
@@ -393,6 +395,67 @@ function createAICompanionUI() {
         }
 
     `;
+    style.textContent += `
+        .video-context-toggle-ext {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-left: 4px;
+        }
+        .video-context-toggle-ext label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .video-context-toggle-ext .label-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .video-context-toggle-ext .label-main {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--yt-spec-text-secondary);
+            transition: color 0.2s ease;
+        }
+        .video-context-toggle-ext .label-sub {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--yt-spec-text-secondary);
+        }
+        .video-context-toggle-ext input[type="checkbox"] {
+            display: none;
+        }
+        .video-context-toggle-ext .checkbox-visual {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--yt-spec-text-secondary);
+            border-radius: 4px;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .video-context-toggle-ext .checkbox-visual svg {
+            display: none;
+        }
+        .video-context-toggle-ext input[type="checkbox"]:checked + label .checkbox-visual {
+            background-color: var(--yt-spec-blue-text);
+            border-color: var(--yt-spec-blue-text);
+        }
+        .video-context-toggle-ext input[type="checkbox"]:checked + label .checkbox-visual svg {
+            display: block;
+            color: white;
+            width: 12px;
+            height: 12px;
+        }
+        .video-context-toggle-ext input[type="checkbox"]:checked + label .label-main {
+            color: var(--yt-spec-text-primary);
+        }
+    `;
     document.head.appendChild(style);
 
     // --- Create UI Elements ---
@@ -444,6 +507,18 @@ function createAICompanionUI() {
         <div class="ai-panel">
             <div id="chat-display-ext"></div>
             <div class="suggested-prompts-container" id="suggested-prompts-ext"></div>
+            <div class="video-context-toggle-ext">
+                <input type="checkbox" id="video-context-checkbox-ext">
+                <label for="video-context-checkbox-ext">
+                    <span class="checkbox-visual">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                    </span>
+                    <span class="label-text">
+                        <span class="label-main">Video Context</span>
+                        <span class="label-sub"></span>
+                    </span>
+                </label>
+            </div>
             <div class="chat-input-container">
                 <div class="chat-input-wrapper">
                     <div class="slash-commands-dropdown" id="slash-commands-dropdown-ext"></div>
@@ -543,6 +618,8 @@ function createAICompanionUI() {
     let trashIconVisible = false; // Track trash icon visibility state
     let selectedCommandIndex = -1; // Track selected command in dropdown
     let filteredCommands = []; // Store filtered commands for dropdown
+    let videoContextEnabled = true; // Local state for video context
+    const videoContextCheckbox = document.getElementById('video-context-checkbox-ext');
 
     // --- Event Listeners ---
     chatDisplay.addEventListener('click', (e) => {
@@ -637,6 +714,29 @@ function createAICompanionUI() {
         e.stopPropagation(); // Prevent header click
         showSlashCommandsManager();
     };
+
+    // Set initial state and handle changes for the video context checkbox
+    if (videoContextCheckbox) {
+        videoContextCheckbox.checked = videoContextEnabled;
+
+        const subLabel = container.querySelector('.label-sub');
+
+        const updateSubLabel = () => {
+            if (subLabel) {
+                subLabel.textContent = videoContextCheckbox.checked
+                    ? 'AI uses video context to answer your question.'
+                    : 'AI answer your question without video context.';
+            }
+        };
+
+        videoContextCheckbox.addEventListener('change', () => {
+            videoContextEnabled = videoContextCheckbox.checked;
+            updateSubLabel();
+        });
+
+        // Set initial text
+        updateSubLabel();
+    }
 
     resetButton.onclick = (e) => {
         e.stopPropagation(); // Prevent header click
@@ -1072,10 +1172,13 @@ function createAICompanionUI() {
         }
 
         // Get transcript
-        let transcript = getTranscriptText();
-        if (!transcript) {
-            appendChatMessage("⚠️ Could not access the transcript for regeneration.", 'ai');
-            return;
+        let transcript = '';
+        if (videoContextEnabled) {
+            transcript = getTranscriptText();
+            if (!transcript) {
+                appendChatMessage("⚠️ Could not access the transcript for regeneration.", 'ai');
+                return;
+            }
         }
 
         // Check if AI provider is configured
@@ -1322,26 +1425,29 @@ function createAICompanionUI() {
         // Process slash commands
         message = processSlashCommands(message);
 
-        let transcript = getTranscriptText();
-        if (!transcript) {
-            // Show loading message with spinner
-            const loadingBubble = appendLoadingMessage("Opening transcript...");
-            const opened = autoOpenTranscript();
-
-            if (opened) {
-                // Wait a moment for transcript to load
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                transcript = getTranscriptText();
-            }
-
-            // Remove loading message
-            loadingBubble.remove();
-
+        let transcript = '';
+        if (videoContextEnabled) {
+            transcript = getTranscriptText();
             if (!transcript) {
-                appendChatMessage("⚠️ Could not access the transcript. Please manually open the transcript by clicking the three-dot menu (...) below the video and selecting 'Show transcript'.", 'ai');
-                return;
-            } else {
-                appendChatMessage("🎬 Transcript loaded! Processing your question...", 'ai');
+                // Show loading message with spinner
+                const loadingBubble = appendLoadingMessage("Opening transcript...");
+                const opened = autoOpenTranscript();
+
+                if (opened) {
+                    // Wait a moment for transcript to load
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    transcript = getTranscriptText();
+                }
+
+                // Remove loading message
+                loadingBubble.remove();
+
+                if (!transcript) {
+                    appendChatMessage("⚠️ Could not access the transcript. Please manually open the transcript by clicking the three-dot menu (...) below the video and selecting 'Show transcript'.", 'ai');
+                    return;
+                } else {
+                    appendChatMessage("🎬 Transcript loaded! Processing your question...", 'ai');
+                }
             }
         }
 
