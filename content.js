@@ -81,12 +81,22 @@ function createAICompanionUI() {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 500;
             color: var(--yt-spec-text-primary);
         }
         .ai-header-title svg {
             fill: url(#gradient-fill);
+        }
+        .ai-header-title span {
+            transition: all 0.3s ease;
+        }
+        #ai-companion-container-ext.collapsed .ai-header-title span::after {
+            content: ' - Ask anything...';
+            font-weight: 400;
+            opacity: 0.7;
+            font-size: 0.9em;
+            margin-left: 4px;
         }
         .ai-header:hover {
             background-color: var(--yt-spec-background-elevation-2);
@@ -478,7 +488,7 @@ function createAICompanionUI() {
             <div class="ai-header-left">
                 <div class="ai-header-title">
                     <img src="${chrome.runtime.getURL('assets/chep-logo.png')}" alt="Chep" style="width: 24px; height: 24px; opacity: 90%; ">
-                    <span style="font-size: 0.8em; opacity:40%; transform: translate(-4px, 2px);"> Ask a question...</span>
+                    <span>Chep</span>
                 </div>
             </div>
             <div class="ai-header-controls">
@@ -674,15 +684,11 @@ function createAICompanionUI() {
         container.classList.toggle('collapsed');
 
         // Update the text based on toggle state
-        const textSpan = container.querySelector('.ai-header-title span:last-child');
-
         if (container.classList.contains('collapsed')) {
-            textSpan.textContent = ' Ask a question...';
             // Hide trash icon when collapsed
             trashIconVisible = false;
             resetButton.style.display = 'none';
         } else {
-            textSpan.textContent = ' Chep';
             // Toggle trash icon visibility when expanded
             trashIconVisible = !trashIconVisible;
             resetButton.style.display = trashIconVisible ? 'flex' : 'none';
@@ -1080,10 +1086,20 @@ function createAICompanionUI() {
     }
 
     // --- Helper Functions ---
+    function getGreetingMessage() {
+        const greetings = [
+            "What's on your mind about this video?",
+            "Ready to dive in? Ask me for a summary, key points, or anything else.",
+            "I'm ready to help you with this video. What would you like to know?",
+            "I've got the video context. Ask me to summarize, explain a topic, or find key moments."
+        ];
+        return greetings[Math.floor(Math.random() * greetings.length)];
+    }
+
     function resetChat() {
         chatHistory = [];
         chatDisplay.innerHTML = '';
-        appendChatMessage("What's on your mind about this video?", 'ai');
+        appendChatMessage(getGreetingMessage(), 'ai');
         displaySuggestedPrompts();
     }
 
@@ -1634,13 +1650,13 @@ function createAICompanionUI() {
             loadingBubble.remove();
 
             if (transcript) {
-                appendChatMessage("What's on your mind about this video?", 'ai');
+                appendChatMessage(getGreetingMessage(), 'ai');
             } else {
                 appendChatMessage("⚠️ Couldn't access the transcript automatically. Please open it manually by clicking the three-dot menu (...) below the video and selecting 'Show transcript'.", 'ai');
             }
         } else {
             // Transcript already available
-            appendChatMessage("What's on your mind about this video?", 'ai');
+            appendChatMessage(getGreetingMessage(), 'ai');
         }
         displaySuggestedPrompts();
     }

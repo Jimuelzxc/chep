@@ -80,15 +80,7 @@ Your job is to:
             const availableTimestamps = this.extractTimestamps(transcript);
             const hasTimestamps = availableTimestamps.length > 0;
 
-            let systemPrompt = `You are a helpful YouTube video assistant.
-
-Your inputs are:
-1. The full transcript of the video (below, enclosed in triple dashes).
-2. The user's question about that video.
-
-Your job is to:
-- **Answer the question concisely and accurately**, prioritizing information found in the transcript, but also using general knowledge when appropriate.
-- **Maintain conversation context** by referring to previous exchanges when relevant.`;
+            let systemPrompt = `You are a helpful YouTube video assistant. Your job is to answer questions concisely and accurately, using the provided video transcript and your general knowledge. Maintain conversation context and refer to previous exchanges when relevant.`;
 
             if (hasTimestamps) {
                 systemPrompt += `
@@ -196,9 +188,7 @@ ${transcript}
 
         // Add a model response to acknowledge the system prompt
         // Add a model response to acknowledge the system prompt
-        const modelAcknowledgement = transcript && transcript.trim().length > 0
-            ? 'I understand. I will help you analyze this YouTube video transcript and answer questions about it accurately, citing specific timestamps when possible.'
-            : 'I understand. I am ready to help.';
+        const modelAcknowledgement = 'I understand. I am ready to help.';
 
         contents.push({
             role: 'model',
