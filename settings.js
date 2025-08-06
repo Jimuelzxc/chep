@@ -273,256 +273,81 @@ class SettingsManager {
         const style = document.createElement('style');
         style.textContent = `
             #ai-settings-modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: 10000;
-                font-family: 'Roboto', Arial, sans-serif;
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                z-index: 10000; font-family: "Roboto", "Arial", sans-serif;
             }
-
             .settings-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                backdrop-filter: blur(4px);
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.8); display: flex; align-items: center;
+                justify-content: center; backdrop-filter: blur(4px);
             }
-
             .settings-modal {
-                background: var(--yt-spec-background-elevation-1, #212121);
-                border-radius: 12px;
-                border: 1px solid var(--yt-spec-border-color, #535353);
-                width: 90%;
-                max-width: 600px;
-                max-height: 80vh;
-                overflow: hidden;
+                background: #212121; border-radius: 12px;
+                border: 1px solid #3F3F3F; width: 90%; max-width: 600px;
+                max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             }
-
             .settings-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px 24px;
-                border-bottom: 1px solid var(--yt-spec-border-color, #535353);
-                background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(62, 166, 255, 0.08));
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 16px 24px; border-bottom: 1px solid #3F3F3F;
             }
-
             .settings-header h2 {
-                margin: 0;
-                color: var(--yt-spec-text-primary, #ffffff);
-                font-size: 20px;
-                font-weight: 500;
+                margin: 0; color: #FFFFFF; font-size: 20px; font-weight: 500;
             }
-
             .settings-close-btn {
-                background: none;
-                border: none;
-                color: var(--yt-spec-text-secondary, #aaaaaa);
-                cursor: pointer;
-                padding: 8px;
-                border-radius: 6px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                background: none; border: none; color: #AAAAAA; cursor: pointer;
+                padding: 8px; border-radius: 50%; display: flex;
                 transition: all 0.2s ease;
             }
-
-            .settings-close-btn:hover {
-                background: var(--yt-spec-background-elevation-2, #3f3f3f);
-                color: var(--yt-spec-text-primary, #ffffff);
-            }
-
-            .settings-content {
-                padding: 24px;
-                max-height: 60vh;
-                overflow-y: auto;
-            }
-
-            .settings-section {
-                margin-bottom: 32px;
-            }
-
-            .settings-section:last-child {
-                margin-bottom: 0;
-            }
-
+            .settings-close-btn:hover { background: #3F3F3F; color: #FFFFFF; }
+            .settings-content { padding: 24px; overflow-y: auto; flex-grow: 1; }
+            .settings-section { margin-bottom: 24px; }
             .settings-section h3 {
-                margin: 0 0 16px 0;
-                color: var(--yt-spec-text-primary, #ffffff);
-                font-size: 16px;
-                font-weight: 500;
-                border-bottom: 1px solid var(--yt-spec-border-color, #535353);
-                padding-bottom: 8px;
+                margin: 0 0 16px 0; color: #FFFFFF; font-size: 16px;
+                font-weight: 500; padding-bottom: 8px;
+                border-bottom: 1px solid #3F3F3F;
             }
-
             .setting-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 16px;
-                gap: 16px;
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 16px; gap: 16px;
             }
-
-            .setting-item label {
-                color: var(--yt-spec-text-primary, #ffffff);
-                font-size: 14px;
-                flex: 1;
+            .setting-item label { color: #FFFFFF; font-size: 14px; flex: 1; }
+            .setting-item select, .setting-item input[type="text"], .setting-item input[type="password"], .setting-item textarea {
+                background: #121212; border: 1px solid #3F3F3F;
+                color: #FFFFFF; padding: 10px; border-radius: 6px;
+                font-size: 14px; font-family: inherit;
             }
-
-            .setting-item select,
-            .setting-item input[type="text"],
-            .setting-item textarea {
-                background: var(--yt-spec-background-elevation-2, #3f3f3f);
-                border: 1px solid var(--yt-spec-border-color, #535353);
-                color: var(--yt-spec-text-primary, #ffffff);
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 14px;
-                min-width: 120px;
-                font-family: inherit;
-                resize: vertical;
-            }
-
-            .setting-item textarea {
-                min-width: 300px;
-                max-width: 100%;
-            }
-
+            .setting-item select { flex: 0 0 200px; }
+            .setting-item input[type="text"], .setting-item input[type="password"] { flex: 0 0 200px; }
+            .setting-item textarea { flex: 1; resize: vertical; min-height: 60px; }
             .setting-item input[type="range"] {
-                min-width: 100px;
-                margin-right: 8px;
+                flex: 0 0 150px; accent-color: #3EA6FF;
             }
-
             .setting-item input[type="checkbox"] {
-                width: 18px;
-                height: 18px;
-                accent-color: var(--yt-spec-blue-text, #3ea6ff);
+                width: 20px; height: 20px; accent-color: #3EA6FF;
             }
-
-            .setting-value {
-                color: var(--yt-spec-text-secondary, #aaaaaa);
-                font-size: 12px;
-                min-width: 40px;
-                text-align: right;
-            }
-
-            .settings-footer {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 20px 24px;
-                border-top: 1px solid var(--yt-spec-border-color, #535353);
-                background: var(--yt-spec-background-elevation-2, #3f3f3f);
-            }
-
-            .settings-reset-btn {
-                background: none;
-                border: 1px solid var(--yt-spec-border-color, #535353);
-                color: var(--yt-spec-text-secondary, #aaaaaa);
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 14px;
-                transition: all 0.2s ease;
-            }
-
-            .settings-reset-btn:hover {
-                background: var(--yt-spec-background-elevation-1, #212121);
-                color: var(--yt-spec-text-primary, #ffffff);
-            }
-
-            .settings-actions {
-                display: flex;
-                gap: 12px;
-            }
-
-            .settings-cancel-btn,
-            .settings-save-btn {
-                padding: 8px 20px;
-                border-radius: 6px;
-                font-size: 14px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                border: none;
-            }
-
-            .settings-cancel-btn {
-                background: var(--yt-spec-background-elevation-1, #212121);
-                color: var(--yt-spec-text-secondary, #aaaaaa);
-                border: 1px solid var(--yt-spec-border-color, #535353);
-            }
-
-            .settings-cancel-btn:hover {
-                background: var(--yt-spec-background-elevation-2, #3f3f3f);
-                color: var(--yt-spec-text-primary, #ffffff);
-            }
-
-            .settings-save-btn {
-                background: linear-gradient(135deg, #0066ff, #3ea6ff);
-                color: white;
-                box-shadow: 0 0 20px rgba(0, 102, 255, 0.3);
-            }
-
-            .settings-save-btn:hover {
-                transform: translateY(-1px);
-                box-shadow: 0 0 25px rgba(0, 102, 255, 0.4), 0 4px 15px rgba(0, 0, 0, 0.2);
-            }
-
-            /* Compact mode styles */
-            #ai-companion-container-ext.compact-mode .ai-header {
-                padding: 8px 12px;
-            }
-
-            #ai-companion-container-ext.compact-mode .ai-header-title {
-                font-size: 16px;
-            }
-
-            #ai-companion-container-ext.compact-mode .ai-panel {
-                padding: 12px;
-            }
-
-            #ai-companion-container-ext.compact-mode #chat-display-ext {
-                height: 200px;
-            }
-
-            /* Provider settings styles */
+            .setting-value { color: #AAAAAA; font-size: 14px; min-width: 40px; text-align: right; }
             .provider-settings {
-                margin-left: 20px;
-                border-left: 2px solid var(--yt-spec-border-color, #535353);
-                padding-left: 16px;
-                margin-top: 12px;
+                margin-left: 16px; border-left: 2px solid #3F3F3F;
+                padding-left: 16px; margin-top: 16px;
             }
-
-            .provider-settings.hidden {
-                display: none;
+            .provider-settings.hidden { display: none; }
+            .settings-footer {
+                display: flex; justify-content: space-between; align-items: center;
+                padding: 16px 24px; border-top: 1px solid #3F3F3F;
+                background: #212121;
             }
-
-            .setting-item input[type="password"] {
-                background: var(--yt-spec-background-elevation-2, #3f3f3f);
-                border: 1px solid var(--yt-spec-border-color, #535353);
-                color: var(--yt-spec-text-primary, #ffffff);
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 14px;
-                min-width: 200px;
+            .settings-reset-btn, .settings-cancel-btn, .settings-save-btn {
+                padding: 10px 20px; border-radius: 6px; font-size: 14px;
+                cursor: pointer; transition: all 0.2s ease; border: none;
+                font-weight: 500; text-transform: uppercase;
             }
-
-            .setting-item input[type="password"]:focus,
-            .setting-item input[type="text"]:focus,
-            .setting-item textarea:focus,
-            .setting-item select:focus {
-                outline: none;
-                border-color: var(--yt-spec-blue-text, #3ea6ff);
-                box-shadow: 0 0 0 2px rgba(62, 166, 255, 0.2);
-            }
+            .settings-reset-btn { background: none; color: #AAAAAA; }
+            .settings-reset-btn:hover { color: #FFFFFF; }
+            .settings-cancel-btn { background: #3F3F3F; color: #FFFFFF; }
+            .settings-cancel-btn:hover { background: #535353; }
+            .settings-save-btn { background: #3EA6FF; color: #0F0F0F; }
+            .settings-save-btn:hover { filter: brightness(1.1); }
         `;
 
         document.head.appendChild(style);

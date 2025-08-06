@@ -21,7 +21,7 @@ function createAICompanionUI() {
             font-family: 'Roboto', Arial, sans-serif;
             margin-bottom: 16px;
             color: var(--yt-spec-text-primary);
-            background-color: var(--yt--background-elevation-1);
+            background-color: #212121;
             border-radius: 12px;
             border: 1px solid var(--yt-spec-border-color);
             padding: 0;
@@ -779,130 +779,181 @@ function createAICompanionUI() {
     // Add slash commands management to settings
     function showSlashCommandsManager() {
         const modal = document.createElement('div');
+        modal.id = 'slash-command-manager-modal';
         modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(4px);
         `;
 
         const content = document.createElement('div');
-        content.style.cssText = `
-            background: var(--yt-spec-background-elevation-1);
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            color: var(--yt-spec-text-primary);
-        `;
-
+        content.className = 'slash-manager-content';
         content.innerHTML = `
-            <h2 style="margin-top: 0; color: var(--yt-spec-blue-text);">Slash Commands Manager</h2>
-            <p style="color: var(--yt-spec-text-secondary); margin-bottom: 20px;">
-                Manage your custom slash commands. Type / in the chat to see all available commands.
-            </p>
-            
-            <div style="margin-bottom: 20px;">
-                <h3>Default Commands</h3>
-                <div id="default-commands-list" style="background: var(--yt-spec-background-elevation-2); padding: 12px; border-radius: 8px; font-size: 12px;"></div>
+            <div class="slash-manager-header">
+                <h2 class="slash-manager-title">Slash Commands Manager</h2>
+                <p class="slash-manager-subtitle">Manage your custom slash commands. Type <strong>/</strong> in the chat to see all available commands.</p>
             </div>
-            
-            <div style="margin-bottom: 20px;">
-                <h3>Custom Commands</h3>
-                <div id="custom-commands-list"></div>
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <input type="text" id="new-command-key" placeholder="/mycommand" style="flex: 1; padding: 8px; background: var(--yt-spec-background-elevation-2); border: 1px solid var(--yt-spec-border-color); border-radius: 4px; color: var(--yt-spec-text-primary);">
-                    <input type="text" id="new-command-value" placeholder="expanded text" style="flex: 2; padding: 8px; background: var(--yt-spec-background-elevation-2); border: 1px solid var(--yt-spec-border-color); border-radius: 4px; color: var(--yt-spec-text-primary);">
-                    <button id="add-command-btn" style="padding: 8px 16px; background: var(--yt-spec-blue-text); color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+
+            <div class="slash-manager-section">
+                <h3 class="slash-manager-section-title">Default Commands</h3>
+                <div id="default-commands-list" class="slash-manager-list"></div>
+            </div>
+
+            <div class="slash-manager-section">
+                <h3 class="slash-manager-section-title">Custom Commands</h3>
+                <div id="custom-commands-list" class="slash-manager-list"></div>
+                <div class="slash-manager-add-form">
+                    <input type="text" id="new-command-key" placeholder="/mycommand" class="slash-manager-input">
+                    <input type="text" id="new-command-value" placeholder="Expanded text" class="slash-manager-input">
+                    <button id="add-command-btn" class="slash-manager-button add">Add</button>
                 </div>
             </div>
-            
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                <button id="close-modal-btn" style="padding: 8px 16px; background: var(--yt-spec-background-elevation-2); color: var(--yt-spec-text-primary); border: 1px solid var(--yt-spec-border-color); border-radius: 4px; cursor: pointer;">Close</button>
+
+            <div class="slash-manager-footer">
+                <button id="close-modal-btn" class="slash-manager-button close">Close</button>
             </div>
         `;
 
+        const style = document.createElement('style');
+        style.textContent = `
+            .slash-manager-content {
+                background: #282828;
+                border-radius: 12px;
+                border: 1px solid #3F3F3F;
+                padding: 24px;
+                max-width: 600px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+                color: #FFFFFF;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+                font-family: "Roboto", "Arial", sans-serif;
+            }
+            .slash-manager-header { text-align: left; margin-bottom: 24px; }
+            .slash-manager-title { margin: 0 0 8px; color: #FFFFFF; font-size: 20px; font-weight: 500; }
+            .slash-manager-subtitle { margin: 0; color: #AAAAAA; font-size: 14px; }
+            .slash-manager-section { margin-bottom: 24px; }
+            .slash-manager-section-title {
+                margin: 0 0 12px;
+                padding-bottom: 8px;
+                border-bottom: 1px solid #3F3F3F;
+                color: #FFFFFF;
+                font-size: 16px;
+                font-weight: 500;
+            }
+            .slash-manager-list {
+                background: #1E1E1E;
+                border-radius: 8px;
+                padding: 8px;
+                font-size: 14px;
+            }
+            .slash-manager-list .command-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 12px;
+                border-radius: 6px;
+                transition: background-color 0.2s;
+            }
+            .command-item strong { color: #3EA6FF; font-weight: 500; min-width: 120px; }
+            .command-item span { flex: 1; color: #AAAAAA; }
+            .command-item .delete-btn {
+                background: #CC0000; color: white; border: none; border-radius: 4px;
+                cursor: pointer; font-size: 12px; padding: 6px 10px;
+                opacity: 0.9; transition: all 0.2s;
+            }
+            .command-item:hover { background-color: #3F3F3F; }
+            .command-item:hover .delete-btn { opacity: 1; background: #FF4444; }
+            .slash-manager-add-form { display: flex; gap: 12px; margin-top: 16px; }
+            .slash-manager-input {
+                flex: 1; padding: 10px; background: #121212;
+                border: 1px solid #3F3F3F; border-radius: 6px;
+                color: #FFFFFF; font-size: 14px;
+            }
+            .slash-manager-input:focus { outline: none; border-color: #3EA6FF; }
+            .slash-manager-button {
+                padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer;
+                font-size: 14px; font-weight: 500; transition: all 0.2s;
+                text-transform: uppercase;
+            }
+            .slash-manager-button.add { background: #3EA6FF; color: #0F0F0F; }
+            .slash-manager-button.add:hover { filter: brightness(1.1); }
+            .slash-manager-button.close {
+                background: #3F3F3F;
+                color: #FFFFFF;
+            }
+            .slash-manager-button.close:hover { background: #535353; }
+            .slash-manager-footer { display: flex; justify-content: flex-end; margin-top: 24px; }
+        `;
+
+        modal.appendChild(style);
         modal.appendChild(content);
         document.body.appendChild(modal);
 
-        // Populate default commands
         const defaultList = content.querySelector('#default-commands-list');
         defaultList.innerHTML = Object.entries(defaultSlashCommands)
-            .map(([key, value]) => `<div><strong>${key}</strong> → ${value}</div>`)
+            .map(([key, value]) => `<div class="command-item"><strong>${key}</strong> → <span>${value}</span></div>`)
             .join('');
 
-        // Populate custom commands
-        updateCustomCommandsList();
+        const customList = content.querySelector('#custom-commands-list');
 
         function updateCustomCommandsList() {
-            const customList = content.querySelector('#custom-commands-list');
             customList.innerHTML = Object.entries(customSlashCommands)
                 .map(([key, value]) => `
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px; background: var(--yt-spec-background-elevation-2); border-radius: 4px;">
-                        <strong style="color: var(--yt-spec-blue-text);">${key}</strong>
-                        <span>→</span>
-                        <span style="flex: 1;">${value}</span>
-                        <button onclick="deleteCustomCommand('${key}')" style="padding: 4px 8px; background: #ff4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+                    <div class="command-item" data-command-key="${key}">
+                        <strong>${key}</strong> → <span>${value}</span>
+                        <button class="delete-btn">Delete</button>
                     </div>
-                `).join('') || '<div style="color: var(--yt-spec-text-secondary); font-style: italic;">No custom commands yet</div>';
+                `).join('') || '<div class="command-item" style="font-style: italic; color: var(--yt-spec-text-secondary);">No custom commands yet</div>';
         }
 
-        // Add command functionality
-        content.querySelector('#add-command-btn').onclick = () => {
+        function addCustomCommand() {
             const keyInput = content.querySelector('#new-command-key');
             const valueInput = content.querySelector('#new-command-value');
             const key = keyInput.value.trim();
             const value = valueInput.value.trim();
 
-            if (!key || !value) {
-                alert('Please enter both command and text');
-                return;
-            }
-
-            if (!key.startsWith('/')) {
-                alert('Command must start with /');
-                return;
-            }
-
-            if (defaultSlashCommands[key]) {
-                alert('Cannot override default commands');
-                return;
-            }
+            if (!key || !value) return alert('Please enter both command and text.');
+            if (!key.startsWith('/')) return alert('Command must start with /.');
+            if (defaultSlashCommands[key]) return alert('Cannot override default commands.');
 
             customSlashCommands[key] = value;
             saveCustomSlashCommands();
             updateCustomCommandsList();
             keyInput.value = '';
             valueInput.value = '';
-        };
+        }
 
-        // Delete command functionality
-        window.deleteCustomCommand = (key) => {
+        function deleteCustomCommand(key) {
             delete customSlashCommands[key];
             saveCustomSlashCommands();
             updateCustomCommandsList();
-        };
+        }
 
-        // Close modal
-        content.querySelector('#close-modal-btn').onclick = () => {
+        function closeModal() {
             document.body.removeChild(modal);
-            delete window.deleteCustomCommand;
-        };
+        }
 
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                document.body.removeChild(modal);
-                delete window.deleteCustomCommand;
+        content.querySelector('#add-command-btn').addEventListener('click', addCustomCommand);
+        content.querySelector('#close-modal-btn').addEventListener('click', closeModal);
+        customList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const item = e.target.closest('.command-item');
+                if (item) {
+                    const key = item.dataset.commandKey;
+                    deleteCustomCommand(key);
+                }
             }
-        };
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        updateCustomCommandsList();
     }
 
     // Keyboard shortcuts
