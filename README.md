@@ -51,19 +51,33 @@ cd chep
 
 > **Note**: The extension is completely free, but you'll need your own API key from one of the supported AI providers.
 
-## ⚙️ Setup
+## 🚀 How to Use chep
 
-### Get Your API Key
+### 1. Get Your API Key (We recommend Google Gemini)
 
-Choose one of these AI providers and get your API key:
+To use chep, you need an API key from a supported AI provider. We strongly recommend Google Gemini because it's easy to set up and offers a generous free tier.
 
-| Provider | Difficulty | Cost | Get API Key |
-|----------|------------|------|-------------|
-| **Google Gemini** ⭐ | Easy | Free tier available | [Get Key](https://aistudio.google.com/app/apikey) |
-| **OpenAI** | Medium | Pay per use | [Get Key](https://platform.openai.com/api-keys) |
-| **OpenRouter** | Medium | Pay per use | [Get Key](https://openrouter.ai/) |
+**How to get your Google Gemini API Key:**
 
-> **💡 Tip**: We recommend starting with Google Gemini as it's the easiest to set up and has a generous free tier.
+1. Go to the [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Click on **"Get API key"**.
+3. Sign in with your Google account if prompted.
+4. Click **"Create API key in new project"**.
+5. Your API key will be generated. Copy it to your clipboard.
+
+For other options, you can also use keys from [OpenAI](https://platform.openai.com/api-keys) or [OpenRouter](https://openrouter.ai/).
+
+### 2. Configure chep in YouTube
+
+After installing the extension and getting your API key, you're ready to start chatting!
+
+1. Go to any YouTube video.
+2. You'll find the **chep AI Companion** panel on the right side of the page, below the video details.
+3. Click the **Settings icon (⚙️)** in the chep panel header to open the configuration menu.
+4. Select your **AI Provider** (e.g., Google Gemini, OpenAI) from the dropdown menu.
+5. Paste your **API Key** into the corresponding input field.
+6. Click **"Save Changes"**.
+7. That's it! You can now close the settings and start asking questions about the video in the chatbox.
 
 
 

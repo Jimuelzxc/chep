@@ -315,12 +315,6 @@
             display: block;
         }
 
-
-
-
-
-
-
         .cta-button {
             display: inline-flex;
             align-items: center;
@@ -362,8 +356,6 @@
         .cta-button:active {
             transform: translateY(-1px);
         }
-
-
 
         /* Features Section */
         .features {
@@ -503,8 +495,6 @@
                 padding: 0 20px 30px;
             }
 
-
-
             .demo-features {
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -534,6 +524,7 @@
                 <div class="nav-links">
                     <a href="https://github.com/Jimuelzxc/chep">GitHub</a>
                     <a href="#features">Features</a>
+                    <a href="#faq">FAQ</a>
                     <a href="#install">Install</a>
                 </div>
             </nav>
@@ -672,6 +663,98 @@
             </div>
         </section>
 
+        <section style="padding: 100px 0; background: #0a0a0a;" id="faq">
+            <div class="container">
+                <h2 style="font-size: 2.5rem; text-align: center; margin-bottom: 20px;">Frequently Asked Questions</h2>
+                <p style="text-align: center; color: #888; max-width: 600px; margin: 0 auto 60px;">
+                    Have questions? We've got answers.
+                </p>
+
+                <div style="max-width: 800px; margin: 0 auto;">
+                    <div class="faq-item" style="border-bottom: 1px solid #222; padding: 25px 0;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px; color: #fff; cursor: pointer;"
+                            onclick="toggleFaq(this)">
+                            How do I use the app?
+                        </h3>
+                        <div class="faq-answer" style="display: none; color: #aaa; line-height: 1.7; padding-top: 10px;">
+                            <p>To use chep, you need an API key from a supported AI provider. We strongly recommend Google Gemini because it's easy to set up and offers a generous free tier.</p>
+                            <ul style="color: #aaa; padding-left: 20px; margin-top: 15px; line-height: 1.8;">
+                                <li>Go to the <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" style="color: #3ea6ff; text-decoration: none;">Google AI Studio</a>.</li>
+                                <li>Click on <strong>"Get API key"</strong>.</li>
+                                <li>Sign in with your Google account if prompted.</li>
+                                <li>Click <strong>"Create API key in new project"</strong>.</li>
+                                <li>Your API key will be generated. Copy it to your clipboard.</li>
+                            </ul>
+                            <p style="color: #aaa; margin-top: 15px;">For other options, you can also use keys from <a href="https://openai.com/" target="_blank" rel="noopener noreferrer" style="color: #3ea6ff; text-decoration: none;">OpenAI</a> or <a href="https://openrouter.ai/" target="_blank" rel="noopener noreferrer" style="color: #3ea6ff; text-decoration: none;">OpenRouter</a>.</p>
+                            <p style="color: #aaa; margin-top: 15px;">After installing the extension and getting your API key, you're ready to start chatting!</p>
+                            <ol style="color: #aaa; padding-left: 20px; margin-top: 15px; line-height: 1.8;">
+                                <li>Go to any YouTube video.</li>
+                                <li>You'll find the <strong>chep AI Companion</strong> panel on the right side of the
+                                    page, below the video details.</li>
+                                <li>Click the <strong>Settings icon (⚙️)</strong> in the chep panel header to open the
+                                    configuration menu.</li>
+                                <li>Select your <strong>AI Provider</strong> (e.g., Google Gemini, OpenAI) from the
+                                    dropdown menu.</li>
+                                <li>Paste your <strong>API Key</strong> into the corresponding input field.</li>
+                                <li>Click <strong>"Save Changes"</strong>.</li>
+                                <li>That's it! You can now close the settings and start asking questions about the video
+                                    in the chatbox.</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="faq-item" style="border-bottom: 1px solid #222; padding: 25px 0;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px; color: #fff; cursor: pointer;"
+                            onclick="toggleFaq(this)">
+                            Is chep free to use?
+                        </h3>
+                        <div class="faq-answer" style="display: none; color: #aaa; line-height: 1.7; padding-top: 10px;">
+                            <p>Yes, the chep extension is completely free to install and use. However, it requires an
+                                API key from a supported AI provider (like Google Gemini, OpenAI, or OpenRouter), which
+                                may have its own costs depending on your usage. We recommend Google Gemini, which offers
+                                a generous free tier that is sufficient for most users.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item" style="border-bottom: 1px solid #222; padding: 25px 0;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px; color: #fff; cursor: pointer;"
+                            onclick="toggleFaq(this)">
+                            What AI providers are supported?
+                        </h3>
+                        <div class="faq-answer" style="display: none; color: #aaa; line-height: 1.7; padding-top: 10px;">
+                            <p>chep supports Google Gemini, OpenAI, and OpenRouter. You can choose your
+                                preferred provider in the extension's settings.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item" style="border-bottom: 1px solid #222; padding: 25px 0;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px; color: #fff; cursor: pointer;"
+                            onclick="toggleFaq(this)">
+                            Do you store my API keys or conversations?
+                        </h3>
+                        <div class="faq-answer" style="display: none; color: #aaa; line-height: 1.7; padding-top: 10px;">
+                            <p>No. Your privacy is our priority. All API keys are stored locally in your browser's
+                                storage and are never sent to our servers. Your conversations are sent directly to the
+                                AI provider you choose and are not stored or monitored by us.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item" style="border-bottom: 1px solid #222; padding: 25px 0;">
+                        <h3 style="font-size: 20px; margin-bottom: 10px; color: #fff; cursor: pointer;"
+                            onclick="toggleFaq(this)">
+                            What are slash commands?
+                        </h3>
+                        <div class="faq-answer" style="display: none; color: #aaa; line-height: 1.7; padding-top: 10px;">
+                            <p>Slash commands are quick shortcuts for common prompts. Simply type <code>/</code> in the
+                                chatbox to see a list of available commands like <code>/summary</code> or
+                                <code>/explain</code>. You can also create your own custom commands in the settings to
+                                tailor the AI's responses to your needs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section style="padding: 100px 0; text-align: center;" id="install">
             <div class="container">
                 <h2 style="font-size: 2.5rem; margin-bottom: 30px;">Ready to make YouTube better?</h2>
@@ -719,6 +802,16 @@
                 header.style.background = 'rgba(10, 10, 10, 0.95)';
             }
         });
+
+        // FAQ Toggle
+        function toggleFaq(element) {
+            const answer = element.nextElementSibling;
+            if (answer.style.display === 'block') {
+                answer.style.display = 'none';
+            } else {
+                answer.style.display = 'block';
+            }
+        }
     </script>
 </body>
 
